@@ -2,7 +2,6 @@ package ru.practicum.shareit.item;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import ru.practicum.shareit.exeptions.AlreadyExistException;
 import ru.practicum.shareit.exeptions.OwnerNotChangeException;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -20,9 +19,9 @@ public class ItemService {
     private final ItemInMemory itemInMemory;
     private final UserService userService;
 
-    public ItemDto createItem(Long userId, ItemDto itemDto){
+    public ItemDto createItem(Long userId, ItemDto itemDto) {
         Item item = ItemMapper.toItem(userId, itemDto);
-        if (!checkItemInStorage(item.getId()) && userService.getUserById(userId) != null){
+        if (!checkItemInStorage(item.getId()) && userService.getUserById(userId) != null) {
             item.setOwnerId(userId);
             return ItemMapper.toItemDto(itemInMemory.createItem(item));
         } else {
@@ -30,13 +29,13 @@ public class ItemService {
         }
     }
 
-    public List<ItemDto> searchItems(String text){
-        if (!text.isBlank()){
+    public List<ItemDto> searchItems(String text) {
+        if (!text.isBlank()) {
             List<ItemDto> filterItems = new ArrayList<>();
             itemInMemory.getItems().forEach(item -> {
                 if (item.getName().toLowerCase().contains(text.toLowerCase())
                         || item.getDescription().toLowerCase().contains(text.toLowerCase())
-                        && item.getAvailable()){
+                        && item.getAvailable()) {
                     filterItems.add(ItemMapper.toItemDto(item));
                 }
             });
@@ -46,37 +45,37 @@ public class ItemService {
         }
     }
 
-    public ItemDto getItemById(Long itemId){
-        if (checkItemInStorage(itemId)){
+    public ItemDto getItemById(Long itemId) {
+        if (checkItemInStorage(itemId)) {
             return ItemMapper.toItemDto(itemInMemory.getItemById(itemId));
         } else {
             throw new AlreadyExistException("Вещь не найдена");
         }
     }
 
-    public List<ItemDto> getItems(Long userId){
+    public List<ItemDto> getItems(Long userId) {
         List<ItemDto> items = new ArrayList<>();
         itemInMemory.getItems().forEach(item -> {
-            if (item.getOwnerId().equals(userId)){
+            if (item.getOwnerId().equals(userId)) {
                 items.add(ItemMapper.toItemDto(item));
             }
         });
         return items;
     }
 
-    public ItemDto updateItem(Long userId, Long itemId, ItemDto itemDto){
+    public ItemDto updateItem(Long userId, Long itemId, ItemDto itemDto) {
         itemDto.setId(itemId);
         Item item = ItemMapper.toItem(userId, itemDto);
         if (checkItemInStorage(item.getId()) && userService.getUserById(userId) != null
-                && ownerNotChange(userId, itemId)){
+                && ownerNotChange(userId, itemId)) {
             Item oldItem = ItemMapper.toItem(userId, getItemById(itemId));
-            if (item.getAvailable() != null){
+            if (item.getAvailable() != null) {
                 oldItem.setAvailable(item.getAvailable());
             }
-            if (item.getDescription() != null){
+            if (item.getDescription() != null) {
                 oldItem.setDescription(item.getDescription());
             }
-            if (item.getName() != null){
+            if (item.getName() != null) {
                 oldItem.setName(item.getName());
             }
             return ItemMapper.toItemDto(itemInMemory.updateItem(oldItem));
@@ -85,16 +84,16 @@ public class ItemService {
         }
     }
 
-    public void deleteItem(Long itemId){
-        if (checkItemInStorage(itemId)){
+    public void deleteItem(Long itemId) {
+        if (checkItemInStorage(itemId)) {
             itemInMemory.deleteItem(itemId);
         } else {
             throw new AlreadyExistException("Вещь не найдена");
         }
     }
 
-    private boolean ownerNotChange(Long userId, Long itemId){
-        if (userId.equals(itemInMemory.getItemById(itemId).getOwnerId())){
+    private boolean ownerNotChange(Long userId, Long itemId) {
+        if (userId.equals(itemInMemory.getItemById(itemId).getOwnerId())) {
             return true;
         } else {
             throw new OwnerNotChangeException("Владельца нельзя сменить");
