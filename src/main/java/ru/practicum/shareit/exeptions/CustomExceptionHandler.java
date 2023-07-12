@@ -1,14 +1,10 @@
-package ru.practicum.shareit.handler;
+package ru.practicum.shareit.exeptions;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.shareit.exeptions.AlreadyExistException;
-import ru.practicum.shareit.exeptions.NotFoundException;
-import ru.practicum.shareit.exeptions.OwnerNotChangeException;
-import ru.practicum.shareit.exeptions.ResponseError;
 
 @Slf4j
 @RestControllerAdvice
@@ -39,7 +35,7 @@ public class CustomExceptionHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseError handle(OwnerNotChangeException exception) {
+    public ResponseError handle(WrongUserException exception) {
         log.error(exception.getMessage(), exception);
         return ResponseError.builder()
                 .error("NOT FOUND")

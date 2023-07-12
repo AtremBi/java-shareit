@@ -1,13 +1,10 @@
-package ru.practicum.shareit.user.impl;
+package ru.practicum.shareit.user;
 
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.UserStorage;
+import ru.practicum.shareit.exeptions.AlreadyExistException;
+import ru.practicum.shareit.user.Dto.UserDto;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class UsersInMemory implements UserStorage {
@@ -40,5 +37,14 @@ public class UsersInMemory implements UserStorage {
     @Override
     public void deleteUser(Long userId) {
         users.remove(userId);
+    }
+
+    @Override
+    public boolean isEmailExist(UserDto userDto) {
+        if (getUsers().stream().noneMatch(u -> u.getEmail().equals(userDto.getEmail()))) {
+            return true;
+        } else {
+            throw new AlreadyExistException("Пользователь с таким email уже существует");
+        }
     }
 }
