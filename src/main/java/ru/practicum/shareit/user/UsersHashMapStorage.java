@@ -1,13 +1,11 @@
 package ru.practicum.shareit.user;
 
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.exeptions.AlreadyExistException;
-import ru.practicum.shareit.user.Dto.UserDto;
 
 import java.util.*;
 
 @Component
-public class UsersInMemory implements UserStorage {
+public class UsersHashMapStorage implements UserStorage {
     private Long id = 1L;
     private final Map<Long, User> users = new HashMap<>();
 
@@ -39,12 +37,4 @@ public class UsersInMemory implements UserStorage {
         users.remove(userId);
     }
 
-    @Override
-    public boolean isEmailExist(UserDto userDto) {
-        if (getUsers().stream().noneMatch(u -> u.getEmail().equals(userDto.getEmail()))) {
-            return true;
-        } else {
-            throw new AlreadyExistException("Пользователь с таким email уже существует");
-        }
-    }
 }

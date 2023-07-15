@@ -2,8 +2,8 @@ package ru.practicum.shareit.item;
 
 import ru.practicum.shareit.item.dto.ItemDto;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ItemMapper {
     public static ItemDto toItemDto(Item item) {
@@ -17,11 +17,7 @@ public class ItemMapper {
     }
 
     public static List<ItemDto> toItemDto(List<Item> items) {
-        List<ItemDto> itemDtos = new ArrayList<>();
-        items.forEach(item -> {
-            itemDtos.add(toItemDto(item));
-        });
-        return itemDtos;
+        return items.stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
     }
 
     public static Item toItem(Long ownerId, ItemDto itemDto) {

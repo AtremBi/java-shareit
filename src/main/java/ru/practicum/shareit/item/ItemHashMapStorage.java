@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 @Component
-public class ItemInMemory implements ItemStorage {
+public class ItemHashMapStorage implements ItemStorage {
     private Long id = 1L;
     private final Map<Long, Item> items = new HashMap<>();
 
