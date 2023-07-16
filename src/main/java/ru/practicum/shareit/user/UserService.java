@@ -14,7 +14,7 @@ public class UserService {
     private final UserStorage userStorage;
 
     public UserDto createUser(UserDto userDto) {
-        if (userStorage.isEmailExist(userDto)) {
+        if (!userStorage.isEmailExist(userDto)) {
             return UserMapper.toUserDto(userStorage.createUser(UserMapper.toUser(userDto)));
         } else {
             throw new AlreadyExistException("Пользователь - " + userDto + " уже существует");
@@ -41,8 +41,10 @@ public class UserService {
         if (user.getName() != null) {
             oldUser.setName(user.getName());
         }
-        if (user.getEmail() != null && getUserById(user.getId()).getEmail().equals(user.getEmail())
-                || user.getEmail() != null && checkEmail(userDto)) {
+        if (user.getEmail() != null && getUserById(user.getId()).getEmail().equals(user.getEmail())) {
+            oldUser.setEmail(user.getEmail());
+        } else if (user.getEmail() != null) {
+            checkEmail(userDto);
             oldUser.setEmail(user.getEmail());
         }
         return UserMapper.toUserDto(userStorage.updateUser(oldUser));
@@ -53,10 +55,8 @@ public class UserService {
         userStorage.deleteUser(userId);
     }
 
-    private boolean checkEmail(UserDto userDto) {
+    private void checkEmail(UserDto userDto) {
         if (userStorage.isEmailExist(userDto)) {
-            return true;
-        } else {
             throw new AlreadyExistException("Пользователь с таким email уже существует");
         }
     }

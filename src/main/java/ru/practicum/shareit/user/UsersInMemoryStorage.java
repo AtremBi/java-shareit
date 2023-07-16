@@ -43,6 +43,6 @@ public class UsersInMemoryStorage implements UserStorage {
 
     @Override
     public boolean isEmailExist(UserDto userDto) {
-        return getUsers().stream().noneMatch(u -> u.getEmail().equals(userDto.getEmail()));
+        return getUsers().stream().anyMatch(u -> u.getEmail().equals(userDto.getEmail()));
     }
 }
