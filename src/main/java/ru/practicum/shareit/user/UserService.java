@@ -14,7 +14,7 @@ public class UserService {
     private final UserStorage userStorage;
 
     public UserDto createUser(UserDto userDto) {
-        if (checkEmail(userDto)) {
+        if (userStorage.isEmailExist(userDto)) {
             return UserMapper.toUserDto(userStorage.createUser(UserMapper.toUser(userDto)));
         } else {
             throw new AlreadyExistException("Пользователь - " + userDto + " уже существует");
@@ -54,7 +54,7 @@ public class UserService {
     }
 
     private boolean checkEmail(UserDto userDto) {
-        if (getUsers().stream().noneMatch(u -> u.getEmail().equals(userDto.getEmail()))) {
+        if (userStorage.isEmailExist(userDto)) {
             return true;
         } else {
             throw new AlreadyExistException("Пользователь с таким email уже существует");
