@@ -28,7 +28,8 @@ public class ItemService {
     private final ItemMapper itemMapper;
 
     @Autowired
-    public ItemService(ItemRepository itemStorage, CommentRepository commentRepository, @Lazy ServiceUtil serviceUtil, @Lazy ItemMapper itemMapper) {
+    public ItemService(ItemRepository itemStorage, CommentRepository commentRepository, @Lazy ServiceUtil serviceUtil,
+                       @Lazy ItemMapper itemMapper) {
         this.itemStorage = itemStorage;
         this.commentRepository = commentRepository;
         this.serviceUtil = serviceUtil;

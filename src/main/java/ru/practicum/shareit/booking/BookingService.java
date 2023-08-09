@@ -152,7 +152,7 @@ public class BookingService {
     @Transactional(readOnly = true)
     public ShortBookingDto getLastBooking(Long itemId) {
         return BookingMapper.toShortBookingDto(bookingRepository
-                .findTopByItemIdAndEndBeforeOrderByEndDesc(itemId, LocalDateTime.now()));
+                .findTopByItemIdAndStartBeforeOrderByStartDesc(itemId, LocalDateTime.now()));
     }
 
     @Transactional(readOnly = true)
