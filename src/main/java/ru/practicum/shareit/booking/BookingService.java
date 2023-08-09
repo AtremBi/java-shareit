@@ -98,8 +98,8 @@ public class BookingService {
             case "ALL":
                 return BookingMapper.toBookingDto(bookingRepository.findAllByBookerId(userId, sortByStartDesc));
             case "FUTURE":
-                return BookingMapper.toBookingDto(bookingRepository.
-                        findByBookerIdAndStartIsAfter(userId, LocalDateTime.now(), sortByStartDesc));
+                return BookingMapper.toBookingDto(bookingRepository
+                        .findByBookerIdAndStartIsAfter(userId, LocalDateTime.now(), sortByStartDesc));
             case "WAITING":
                 return BookingMapper.toBookingDto(bookingRepository
                         .findByBookerIdAndStatus(userId, BookingStatus.WAITING, sortByStartDesc));
@@ -112,8 +112,7 @@ public class BookingService {
                                 LocalDateTime.now(), sortByStartDesc));
             case "PAST":
                 return BookingMapper.toBookingDto(bookingRepository
-                        .findByBookerIdAndEndIsBefore(userId, LocalDateTime.now()
-                                , sortByStartDesc));
+                        .findByBookerIdAndEndIsBefore(userId, LocalDateTime.now(), sortByStartDesc));
             default:
                 throw new ValidationException("Unknown state: " + state);
         }
@@ -129,8 +128,8 @@ public class BookingService {
             case "ALL":
                 return BookingMapper.toBookingDto(bookingRepository.findAllByItem_OwnerId(userId, sortByStartDesc));
             case "FUTURE":
-                return BookingMapper.toBookingDto(bookingRepository.
-                        findByItem_OwnerIdAndStartIsAfter(userId, LocalDateTime.now(), sortByStartDesc));
+                return BookingMapper.toBookingDto(bookingRepository
+                        .findByItem_OwnerIdAndStartIsAfter(userId, LocalDateTime.now(), sortByStartDesc));
             case "WAITING":
                 return BookingMapper.toBookingDto(bookingRepository
                         .findByItem_OwnerIdAndStatus(userId, BookingStatus.WAITING, sortByStartDesc));
@@ -144,8 +143,7 @@ public class BookingService {
                                 LocalDateTime.now(), sortByStartDesc));
             case "PAST":
                 return BookingMapper.toBookingDto(bookingRepository
-                        .findByItem_OwnerIdAndEndIsBefore(userId, LocalDateTime.now()
-                                , sortByStartDesc));
+                        .findByItem_OwnerIdAndEndIsBefore(userId, LocalDateTime.now(), sortByStartDesc));
             default:
                 throw new ValidationException("Unknown state: " + state);
         }
@@ -153,14 +151,14 @@ public class BookingService {
 
     @Transactional(readOnly = true)
     public ShortBookingDto getLastBooking(Long itemId) {
-        return BookingMapper.toShortBookingDto(bookingRepository.
-                findFirstByItem_IdAndEndBeforeOrderByEndDesc(itemId, LocalDateTime.now()));
+        return BookingMapper.toShortBookingDto(bookingRepository
+                .findFirstByItem_IdAndEndBeforeOrderByEndDesc(itemId, LocalDateTime.now()));
     }
 
     @Transactional(readOnly = true)
     public ShortBookingDto getNextBooking(Long itemId) {
-        return BookingMapper.toShortBookingDto(bookingRepository.
-                findFirstByItem_IdAndStartAfterOrderByStartAsc(itemId, LocalDateTime.now()));
+        return BookingMapper.toShortBookingDto(bookingRepository
+                .findFirstByItem_IdAndStartAfterOrderByStartAsc(itemId, LocalDateTime.now()));
     }
 
     public Booking getBookingWithUserBookedItem(Long itemId, Long userId) {
