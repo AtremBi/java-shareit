@@ -152,13 +152,13 @@ public class BookingService {
     @Transactional(readOnly = true)
     public ShortBookingDto getLastBooking(Long itemId) {
         return BookingMapper.toShortBookingDto(bookingRepository
-                .findFirstByItem_IdAndEndBeforeOrderByEndDesc(itemId, LocalDateTime.now()));
+                .findTopByItemIdAndEndBeforeOrderByEndDesc(itemId, LocalDateTime.now()));
     }
 
     @Transactional(readOnly = true)
     public ShortBookingDto getNextBooking(Long itemId) {
         return BookingMapper.toShortBookingDto(bookingRepository
-                .findFirstByItem_IdAndStartAfterOrderByStartAsc(itemId, LocalDateTime.now()));
+                .findTopByItem_IdAndStartAfterOrderByStartAsc(itemId, LocalDateTime.now()));
     }
 
     public Booking getBookingWithUserBookedItem(Long itemId, Long userId) {
