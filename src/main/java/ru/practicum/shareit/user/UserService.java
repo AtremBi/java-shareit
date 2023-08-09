@@ -15,6 +15,7 @@ import java.util.List;
 @Slf4j
 public class UserService {
     private final UserRepository userStorage;
+
     public UserDto createUser(UserDto userDto) {
         try {
             return UserMapper.toUserDto(userStorage.save(UserMapper.toUser(userDto)));

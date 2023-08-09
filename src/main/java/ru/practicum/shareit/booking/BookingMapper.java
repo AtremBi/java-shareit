@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class BookingMapper {
     public static ShortBookingDto toShortBookingDto(Booking booking) {
-        if (booking != null){
+        if (booking != null) {
             return new ShortBookingDto(
                     booking.getId(),
                     booking.getBooker().getId(),

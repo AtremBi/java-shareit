@@ -52,17 +52,17 @@ public class ItemService {
     public ItemDto getItemById(Long itemId, Long userId) {
         Item item = findItemById(itemId);
         ItemDto itemDto;
-        if (item.getOwnerId().equals(userId)){
-           itemDto = itemMapper.toItemDtoWithLastAndEndNextBooking(item);
+        if (item.getOwnerId().equals(userId)) {
+            itemDto = itemMapper.toItemDtoWithLastAndEndNextBooking(item);
         } else {
             itemDto = itemMapper.toItemDto(item);
         }
         if (itemDto.getLastBooking() != null && serviceUtil.getBookingService().getBookingById(itemDto.getLastBooking().getId(),
-                userId).getStatus().equals(BookingStatus.REJECTED)){
+                userId).getStatus().equals(BookingStatus.REJECTED)) {
             itemDto.setLastBooking(null);
         }
         if (itemDto.getNextBooking() != null && serviceUtil.getBookingService().getBookingById(itemDto.getNextBooking().getId(),
-                userId).getStatus().equals(BookingStatus.REJECTED)){
+                userId).getStatus().equals(BookingStatus.REJECTED)) {
             itemDto.setNextBooking(null);
         }
         return itemDto;
@@ -116,7 +116,7 @@ public class ItemService {
     }
 
 
-    public List<CommentDto> getCommentsByItemId(Long itemId){
+    public List<CommentDto> getCommentsByItemId(Long itemId) {
         return commentRepository.findAllByItem_Id(itemId,
                         Sort.by(Sort.Direction.DESC, "created")).stream()
                 .map(itemMapper::toCommentDto)

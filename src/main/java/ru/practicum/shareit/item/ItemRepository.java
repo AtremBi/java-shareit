@@ -7,11 +7,11 @@ import java.util.List;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findItemByOwnerId(Long ownerId);
+
     @Query(" select i from Item i " +
             "where upper(i.name) like upper(concat('%', :text, '%')) " +
             " or upper(i.description) like upper(concat('%', :text, '%'))" +
             " and i.isAvailable = true")
     List<Item> searchByQuery(String text);
-//    List<Item> findItemByIdOrderByIdDesc(Long Id);
 
 }

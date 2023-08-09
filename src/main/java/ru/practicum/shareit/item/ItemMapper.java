@@ -13,7 +13,8 @@ import java.util.List;
 @AllArgsConstructor
 public class ItemMapper {
     private final ServiceUtil serviceUtil;
-    public  ItemDto toItemDto(Item item) {
+
+    public ItemDto toItemDto(Item item) {
         return new ItemDto(
                 item.getId(),
                 item.getName(),
@@ -40,8 +41,8 @@ public class ItemMapper {
     }
 
     public List<ItemDto> toItemDtoWithLastAndEndNextBooking(List<Item> items) {
-        List <ItemDto> itemDtos = new ArrayList<>();
-        for (Item item : items){
+        List<ItemDto> itemDtos = new ArrayList<>();
+        for (Item item : items) {
             toItemDtoWithLastAndEndNextBooking(item);
             itemDtos.add(toItemDtoWithLastAndEndNextBooking(item));
         }
@@ -50,8 +51,8 @@ public class ItemMapper {
     }
 
     public List<ItemDto> toItemDto(List<Item> items) {
-        List <ItemDto> itemDtos = new ArrayList<>();
-        for (Item item : items){
+        List<ItemDto> itemDtos = new ArrayList<>();
+        for (Item item : items) {
             itemDtos.add(toItemDto(item));
         }
         return itemDtos;
@@ -68,7 +69,7 @@ public class ItemMapper {
         );
     }
 
-    public CommentDto toCommentDto(Comment comment){
+    public CommentDto toCommentDto(Comment comment) {
         return new CommentDto(
                 comment.getId(),
                 comment.getText(),
