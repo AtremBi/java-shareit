@@ -46,7 +46,7 @@ public class ItemInMemoryStorage implements ItemStorage {
         getItems().forEach(item -> {
             if (item.getName().toLowerCase().contains(text.toLowerCase())
                     || item.getDescription().toLowerCase().contains(text.toLowerCase())
-                    && item.getAvailable()) {
+                    && item.getIsAvailable()) {
                 filterItems.add(item);
             }
         });
