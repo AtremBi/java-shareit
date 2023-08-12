@@ -22,7 +22,8 @@ public class Item {
     @NotBlank
     private String description;
     @NotNull
-    private Boolean isAvailable;
+    @Column(name = "is_available", nullable = false)
+    private Boolean available;
     private Long ownerId;
     private Long requestId;
 }

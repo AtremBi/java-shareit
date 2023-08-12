@@ -1,7 +1,6 @@
 package ru.practicum.shareit.booking;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +11,7 @@ import ru.practicum.shareit.exeptions.ChangeStatusException;
 import ru.practicum.shareit.exeptions.ItemUnavailable;
 import ru.practicum.shareit.exeptions.NotFoundException;
 import ru.practicum.shareit.exeptions.ValidationException;
+import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.user.UserService;
 
@@ -27,17 +27,18 @@ public class BookingService {
 
     @Autowired
     public BookingService(BookingRepository bookingRepository, UserService userService,
-                          @Lazy ItemService itemService) {
+                          ItemService itemService) {
         this.bookingRepository = bookingRepository;
         this.userService = userService;
         this.itemService = itemService;
     }
 
     public BookingDto create(BookingInputDto bookingInputDto, Long bookerId) {
-        if (Objects.equals(bookerId, itemService.findItemById(bookingInputDto.getItemId()).getOwnerId())) {
+        Item itemId = itemService.findItemById(bookingInputDto.getItemId());
+        if (Objects.equals(bookerId, itemId.getOwnerId())) {
             throw new NotFoundException("Вещь не доступна для бронирования");
         }
-        if (!itemService.findItemById(bookingInputDto.getItemId()).getIsAvailable()) {
+        if (!itemId.getAvailable()) {
             throw new ItemUnavailable("Вещь не доступна для бронирования");
         }
         timeCheck(bookingInputDto.getStart(), bookingInputDto.getEnd());
@@ -70,9 +71,6 @@ public class BookingService {
             }
         } else {
             throw new ValidationException("Подтвердить бронирование может только владелец");
-//            if (booking.getStatus().equals(BookingStatus.CANCELED)){
-//                throw new ValidationException("Бронирование было отменено");
-//            }
         }
         return BookingMapper.toBookingDto(bookingRepository.save(booking));
     }
@@ -126,24 +124,24 @@ public class BookingService {
         }
         switch (state) {
             case "ALL":
-                return BookingMapper.toBookingDto(bookingRepository.findAllByItem_OwnerId(userId, sortByStartDesc));
+                return BookingMapper.toBookingDto(bookingRepository.findAllByItemOwnerId(userId, sortByStartDesc));
             case "FUTURE":
                 return BookingMapper.toBookingDto(bookingRepository
-                        .findByItem_OwnerIdAndStartIsAfter(userId, LocalDateTime.now(), sortByStartDesc));
+                        .findByItemOwnerIdAndStartIsAfter(userId, LocalDateTime.now(), sortByStartDesc));
             case "WAITING":
                 return BookingMapper.toBookingDto(bookingRepository
-                        .findByItem_OwnerIdAndStatus(userId, BookingStatus.WAITING, sortByStartDesc));
+                        .findByItemOwnerIdAndStatus(userId, BookingStatus.WAITING, sortByStartDesc));
 
             case "REJECTED":
                 return BookingMapper.toBookingDto(bookingRepository
-                        .findByItem_OwnerIdAndStatus(userId, BookingStatus.REJECTED, sortByStartDesc));
+                        .findByItemOwnerIdAndStatus(userId, BookingStatus.REJECTED, sortByStartDesc));
             case "CURRENT":
                 return BookingMapper.toBookingDto(bookingRepository
-                        .findByItem_OwnerIdAndStartIsBeforeAndEndIsAfter(userId, LocalDateTime.now(),
+                        .findByItemOwnerIdAndStartIsBeforeAndEndIsAfter(userId, LocalDateTime.now(),
                                 LocalDateTime.now(), sortByStartDesc));
             case "PAST":
                 return BookingMapper.toBookingDto(bookingRepository
-                        .findByItem_OwnerIdAndEndIsBefore(userId, LocalDateTime.now(), sortByStartDesc));
+                        .findByItemOwnerIdAndEndIsBefore(userId, LocalDateTime.now(), sortByStartDesc));
             default:
                 throw new ValidationException("Unknown state: " + state);
         }
@@ -158,7 +156,7 @@ public class BookingService {
     @Transactional(readOnly = true)
     public ShortBookingDto getNextBooking(Long itemId) {
         return BookingMapper.toShortBookingDto(bookingRepository
-                .findTopByItem_IdAndStartAfterOrderByStartAsc(itemId, LocalDateTime.now()));
+                .findTopByItemIdAndStartAfterOrderByStartAsc(itemId, LocalDateTime.now()));
     }
 
     public Booking getBookingWithUserBookedItem(Long itemId, Long userId) {

@@ -86,8 +86,8 @@ public class ItemService {
         validateOwner(userId, itemId);
         serviceUtil.getUserService().getUserById(userId);
         Item oldItem = itemMapper.toItem(userId, itemMapper.toItemDto(findItemById(itemId)));
-        if (item.getIsAvailable() != null) {
-            oldItem.setIsAvailable(item.getIsAvailable());
+        if (item.getAvailable() != null) {
+            oldItem.setAvailable(item.getAvailable());
         }
         if (item.getDescription() != null) {
             oldItem.setDescription(item.getDescription());
@@ -118,7 +118,7 @@ public class ItemService {
 
 
     public List<CommentDto> getCommentsByItemId(Long itemId) {
-        return commentRepository.findAllByItem_Id(itemId,
+        return commentRepository.findAllByItemId(itemId,
                         Sort.by(Sort.Direction.DESC, "created")).stream()
                 .map(itemMapper::toCommentDto)
                 .collect(toList());
