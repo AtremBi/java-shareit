@@ -14,10 +14,9 @@ public class CustomExceptionHandler {
     public ResponseError handle(NotFoundException exception) {
         log.error(exception.getMessage(), exception);
         return ResponseError.builder()
-                .error("NOT FOUND")
+                .error(exception.getMessage())
                 .status(404)
                 .exception("ru.practicum.shareit.exceptions.NotFoundException")
-                .message(exception.getMessage())
                 .build();
     }
 
@@ -26,10 +25,9 @@ public class CustomExceptionHandler {
     public ResponseError handleAlreadyExists(AlreadyExistException exception) {
         log.error(exception.getMessage(), exception);
         return ResponseError.builder()
-                .error("CONFLICT")
+                .error(exception.getMessage())
                 .status(409)
                 .exception("ru.practicum.shareit.exceptions.AlreadyExistedException")
-                .message(exception.getMessage())
                 .build();
     }
 
@@ -38,10 +36,42 @@ public class CustomExceptionHandler {
     public ResponseError handle(WrongUserException exception) {
         log.error(exception.getMessage(), exception);
         return ResponseError.builder()
-                .error("NOT FOUND")
+                .error(exception.getMessage())
                 .status(404)
                 .exception("ru.practicum.shareit.exceptions.OwnerNotChangeException")
-                .message(exception.getMessage())
+                .build();
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseError handle(ItemUnavailable exception) {
+        log.error(exception.getMessage(), exception);
+        return ResponseError.builder()
+                .error(exception.getMessage())
+                .status(400)
+                .exception("ru.practicum.shareit.exceptions.ItemUnavailable")
+                .build();
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseError handle(ValidationException exception) {
+        log.error(exception.getMessage(), exception);
+        return ResponseError.builder()
+                .error(exception.getMessage())
+                .status(500)
+                .exception("ru.practicum.shareit.exceptions.ValidationException")
+                .build();
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseError handle(ChangeStatusException exception) {
+        log.error(exception.getMessage(), exception);
+        return ResponseError.builder()
+                .error(exception.getMessage())
+                .status(500)
+                .exception("ru.practicum.shareit.exceptions.ChangeStatusException")
                 .build();
     }
 }

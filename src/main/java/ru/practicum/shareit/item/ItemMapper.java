@@ -1,26 +1,64 @@
 package ru.practicum.shareit.item;
 
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Component;
+import ru.practicum.shareit.ServiceUtil;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
+@Component
+@AllArgsConstructor
 public class ItemMapper {
-    public static ItemDto toItemDto(Item item) {
+    private final ServiceUtil serviceUtil;
+
+    public ItemDto toItemDto(Item item) {
         return new ItemDto(
                 item.getId(),
                 item.getName(),
                 item.getDescription(),
                 item.getAvailable(),
-                item.getRequestId() != null ? item.getRequestId() : null
+                item.getRequestId() != null ? item.getRequestId() : null,
+                null,
+                null,
+                serviceUtil.getItemService().getCommentsByItemId(item.getId())
         );
     }
 
-    public static List<ItemDto> toItemDto(List<Item> items) {
-        return items.stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
+    public ItemDto toItemDtoWithLastAndEndNextBooking(Item item) {
+        return new ItemDto(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.getAvailable(),
+                item.getRequestId() != null ? item.getRequestId() : null,
+                serviceUtil.getBookingService().getLastBooking(item.getId()),
+                serviceUtil.getBookingService().getNextBooking(item.getId()),
+                serviceUtil.getItemService().getCommentsByItemId(item.getId())
+        );
     }
 
-    public static Item toItem(Long ownerId, ItemDto itemDto) {
+    public List<ItemDto> toItemDtoWithLastAndEndNextBooking(List<Item> items) {
+        List<ItemDto> itemDtos = new ArrayList<>();
+        for (Item item : items) {
+            toItemDtoWithLastAndEndNextBooking(item);
+            itemDtos.add(toItemDtoWithLastAndEndNextBooking(item));
+        }
+        return itemDtos;
+
+    }
+
+    public List<ItemDto> toItemDto(List<Item> items) {
+        List<ItemDto> itemDtos = new ArrayList<>();
+        for (Item item : items) {
+            itemDtos.add(toItemDto(item));
+        }
+        return itemDtos;
+    }
+
+    public Item toItem(Long ownerId, ItemDto itemDto) {
         return new Item(
                 itemDto.getId(),
                 itemDto.getName(),
@@ -29,5 +67,16 @@ public class ItemMapper {
                 ownerId,
                 itemDto.getRequestId()
         );
+    }
+
+    public CommentDto toCommentDto(Comment comment) {
+        return new CommentDto(
+                comment.getId(),
+                comment.getText(),
+                comment.getItem(),
+                comment.getAuthor().getName(),
+                comment.getCreated()
+        );
+
     }
 }
