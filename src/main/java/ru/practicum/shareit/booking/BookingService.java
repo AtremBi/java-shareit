@@ -152,8 +152,8 @@ public class BookingService {
                         .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
             case "CURRENT":
                 return bookingRepository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfter(userId, LocalDateTime.now(),
-                                LocalDateTime.now(), pageRequest).
-                        stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
+                                LocalDateTime.now(), pageRequest)
+                        .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
             case "PAST":
                 return bookingRepository.findByItemOwnerIdAndEndIsBefore(userId, LocalDateTime.now(), pageRequest)
                         .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
