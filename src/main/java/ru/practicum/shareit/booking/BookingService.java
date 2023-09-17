@@ -137,8 +137,8 @@ public class BookingService {
         }
         switch (state) {
             case "ALL":
-                return bookingRepository.findAllByItemOwnerId(userId, pageRequest).
-                        stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
+                return bookingRepository.findAllByItemOwnerId(userId, pageRequest)
+                        .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
             case "FUTURE":
                 return bookingRepository
                         .findByItemOwnerIdAndStartIsAfter(userId, LocalDateTime.now(), pageRequest)
