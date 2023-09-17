@@ -100,15 +100,15 @@ public class BookingService {
         switch (state) {
             case "ALL":
                 return bookingRepository.findAllByBookerId(userId, pageRequest)
-                                .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
+                        .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
             case "FUTURE":
                 return bookingRepository
                         .findByBookerIdAndStartIsAfter(userId, LocalDateTime.now(), pageRequest)
-                                .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
+                        .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
             case "WAITING":
                 return bookingRepository
                         .findByBookerIdAndStatus(userId, BookingStatus.WAITING, pageRequest)
-                                .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
+                        .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
             case "REJECTED":
                 return bookingRepository
                         .findByBookerIdAndStatus(userId, BookingStatus.REJECTED, pageRequest)
@@ -120,8 +120,8 @@ public class BookingService {
                         stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
             case "PAST":
                 return bookingRepository
-                        .findByBookerIdAndEndIsBefore(userId, LocalDateTime.now(), pageRequest).
-                        stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
+                        .findByBookerIdAndEndIsBefore(userId, LocalDateTime.now(), pageRequest)
+                        .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
             default:
                 throw new ValidationException("Unknown state: " + state);
         }
@@ -145,18 +145,18 @@ public class BookingService {
                         .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
             case "WAITING":
                 return bookingRepository.findByItemOwnerIdAndStatus(userId, BookingStatus.WAITING, pageRequest)
-                                .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
+                        .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
 
             case "REJECTED":
                 return bookingRepository.findByItemOwnerIdAndStatus(userId, BookingStatus.REJECTED, pageRequest)
-                                .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
+                        .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
             case "CURRENT":
                 return bookingRepository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfter(userId, LocalDateTime.now(),
                                 LocalDateTime.now(), pageRequest).
                         stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
             case "PAST":
-                return bookingRepository.findByItemOwnerIdAndEndIsBefore(userId, LocalDateTime.now(), pageRequest).
-                        stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
+                return bookingRepository.findByItemOwnerIdAndEndIsBefore(userId, LocalDateTime.now(), pageRequest)
+                        .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
             default:
                 throw new ValidationException("Unknown state: " + state);
         }
