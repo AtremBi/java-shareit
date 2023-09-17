@@ -27,13 +27,17 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDto> searchItems(@RequestParam(name = "text") String text) {
-        return itemService.searchItems(text);
+    public List<ItemDto> searchItems(@RequestParam(name = "text") String text,
+                                     @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                     @RequestParam(name = "size", defaultValue = "20") Integer size) {
+        return itemService.searchItems(text, from, size);
     }
 
     @GetMapping
-    public List<ItemDto> getItems(@RequestHeader(value = "X-Sharer-User-Id") Long userId) {
-        return itemService.getItems(userId);
+    public List<ItemDto> getItems(@RequestHeader(value = "X-Sharer-User-Id") Long userId,
+                                  @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                  @RequestParam(name = "size", defaultValue = "20") Integer size) {
+        return itemService.getItems(userId, from, size);
     }
 
     @PatchMapping("/{itemId}")

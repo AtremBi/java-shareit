@@ -2,6 +2,7 @@ package ru.practicum.shareit.item;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.ServiceUtil;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -43,11 +45,13 @@ public class ItemService {
         return itemMapper.toItemDto(itemStorage.save(item));
     }
 
-    public List<ItemDto> searchItems(String text) {
+    public List<ItemDto> searchItems(String text, Integer from, Integer size) {
+        PageRequest pageRequest = PageRequest.of(from / size, size, Sort.Direction.DESC, "name");
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        return itemMapper.toItemDto(itemStorage.searchByQuery(text));
+        return itemStorage.searchByQuery(text, pageRequest).stream()
+                .map(itemMapper::toItemDto).collect(Collectors.toList());
     }
 
     public ItemDto getItemById(Long itemId, Long userId) {
@@ -74,8 +78,13 @@ public class ItemService {
                 .orElseThrow(() -> new NotFoundException("Вещь не найдена"));
     }
 
-    public List<ItemDto> getItems(Long userId) {
-        return itemMapper.toItemDtoWithLastAndEndNextBooking(itemStorage.findItemByOwnerId(userId).stream()
+    public List<ItemDto> getItemsByRequestId(Long requestId) {
+        return itemMapper.toItemDto(itemStorage.findByRequestId(requestId));
+    }
+
+    public List<ItemDto> getItems(Long userId, Integer from, Integer size) {
+        PageRequest pageRequest = PageRequest.of(from / size, size, Sort.Direction.DESC, "name");
+        return itemMapper.toItemDtoWithLastAndEndNextBooking(itemStorage.findItemByOwnerId(userId, pageRequest).stream()
                 .sorted(Comparator.comparing(Item::getId))
                 .collect(toList()));
     }
