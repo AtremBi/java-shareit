@@ -61,7 +61,7 @@ public class BookingServiceTest {
     }
 
     @Test
-    void shouldException_whenNotValidTime(){
+    void shouldException_whenNotValidTime() {
         UserDto ownerDto = userService.createUser(userDto1);
         UserDto newUserDto = userService.createUser(userDto2);
         ItemDto newItemDto = itemService.createItem(ownerDto.getId(), itemDto1);
@@ -76,7 +76,7 @@ public class BookingServiceTest {
     }
 
     @Test
-    void shouldUpdateBookingStatusApproved(){
+    void shouldUpdateBookingStatusApproved() {
         UserDto ownerDto = userService.createUser(userDto1);
         UserDto newUserDto = userService.createUser(userDto2);
         ItemDto newItemDto = itemService.createItem(ownerDto.getId(), itemDto1);
@@ -91,7 +91,7 @@ public class BookingServiceTest {
     }
 
     @Test
-    void shouldException_whenReplayUpdateBooking(){
+    void shouldException_whenReplayUpdateBooking() {
         UserDto ownerDto = userService.createUser(userDto1);
         UserDto newUserDto = userService.createUser(userDto2);
         ItemDto newItemDto = itemService.createItem(ownerDto.getId(), itemDto1);
@@ -108,7 +108,7 @@ public class BookingServiceTest {
     }
 
     @Test
-    void shouldException_whenNotBookerUpdate(){
+    void shouldException_whenNotBookerUpdate() {
         UserDto ownerDto = userService.createUser(userDto1);
         UserDto newUserDto = userService.createUser(userDto2);
         ItemDto newItemDto = itemService.createItem(ownerDto.getId(), itemDto1);
@@ -124,7 +124,7 @@ public class BookingServiceTest {
     }
 
     @Test
-    void shouldException_whenNotBookerUpdate2(){
+    void shouldException_whenNotBookerUpdate2() {
         UserDto ownerDto = userService.createUser(userDto1);
         UserDto newUserDto = userService.createUser(userDto2);
         userDto2.setId(322L);
