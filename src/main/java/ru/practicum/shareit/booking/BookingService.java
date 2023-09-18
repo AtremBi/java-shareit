@@ -90,7 +90,7 @@ public class BookingService {
 
     public List<BookingDto> getBookings(Long userId, String state, Integer from, Integer size) {
         userService.findUserById(userId);
-        if (size == null){
+        if (size == null) {
             size = 20;
         }
         fromAndSizeValidation(from, size);
@@ -133,7 +133,7 @@ public class BookingService {
 
     public List<BookingDto> getBookingsByOwner(Long userId, String state, Integer from, Integer size) {
         userService.findUserById(userId);
-        if(size == null){
+        if (size == null) {
             size = 20;
         }
         fromAndSizeValidation(from, size);

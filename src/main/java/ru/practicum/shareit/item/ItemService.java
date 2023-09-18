@@ -46,7 +46,7 @@ public class ItemService {
     }
 
     public List<ItemDto> searchItems(String text, Integer from, Integer size) {
-        if (size == null){
+        if (size == null) {
             size = 20;
         }
         PageRequest pageRequest = PageRequest.of(from / size, size, Sort.Direction.DESC, "name");
