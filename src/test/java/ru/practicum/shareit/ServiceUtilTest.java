@@ -19,17 +19,17 @@ public class ServiceUtilTest {
     private final BookingService bookingService;
 
     @Test
-    void getItemService(){
+    void getItemService() {
         assertEquals(itemService, serviceUtil.getItemService());
     }
 
     @Test
-    void getUserService(){
+    void getUserService() {
         assertEquals(userService, serviceUtil.getUserService());
     }
 
     @Test
-    void getBookingService(){
+    void getBookingService() {
         assertEquals(bookingService, serviceUtil.getBookingService());
     }
 }
