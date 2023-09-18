@@ -90,6 +90,9 @@ public class BookingService {
 
     public List<BookingDto> getBookings(Long userId, String state, Integer from, Integer size) {
         userService.findUserById(userId);
+        if (size == null){
+            size = 20;
+        }
         fromAndSizeValidation(from, size);
         PageRequest pageRequest;
 
@@ -130,6 +133,9 @@ public class BookingService {
 
     public List<BookingDto> getBookingsByOwner(Long userId, String state, Integer from, Integer size) {
         userService.findUserById(userId);
+        if(size == null){
+            size = 20;
+        }
         fromAndSizeValidation(from, size);
         PageRequest pageRequest = PageRequest.of(from / size, size, Sort.Direction.DESC, "start");
         if (state == null) {

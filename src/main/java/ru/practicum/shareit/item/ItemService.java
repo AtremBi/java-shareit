@@ -46,6 +46,9 @@ public class ItemService {
     }
 
     public List<ItemDto> searchItems(String text, Integer from, Integer size) {
+        if (size == null){
+            size = 20;
+        }
         PageRequest pageRequest = PageRequest.of(from / size, size, Sort.Direction.DESC, "name");
         if (text.isBlank()) {
             return new ArrayList<>();
@@ -137,7 +140,7 @@ public class ItemService {
         if (userId.equals(itemStorage.findById(itemId).get().getOwnerId())) {
             return true;
         } else {
-            throw new WrongUserException("Владельца нельзя сменить");
+            throw new WrongUserException("У пользователя нет такой вещи");
         }
     }
 }

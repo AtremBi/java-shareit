@@ -49,7 +49,7 @@ public class ItemRequestServiceTest {
     public UserDto userDto2 = new UserDto(2L, getRandomString(), getRandomEmail());
 
     @BeforeEach
-    void beforeEach() {
+    void setUp() {
         userDto1 = new UserDto(1L, getRandomString(), getRandomEmail());
         userDto2 = new UserDto(2L, getRandomString(), getRandomEmail());
         itemRequestServiceWithMock = new ItemRequestService(mockItemRequestRepository,

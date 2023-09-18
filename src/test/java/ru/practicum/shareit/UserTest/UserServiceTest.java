@@ -46,7 +46,7 @@ public class UserServiceTest {
     private User user = new User(1L, getRandomString(), getRandomEmail());
 
     @BeforeEach
-    void beforeEach() {
+    void seyUp() {
         userServiceWithMock = new UserService(mockUserRepository);
     }
 
