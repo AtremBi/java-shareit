@@ -6,6 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
+import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.BookingMapper;
+import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.user.User;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -28,11 +33,15 @@ public class ShortBookingDtoTest {
 
     @BeforeEach
     void beforeEach() {
-        bookingShortDto = new ShortBookingDto(
-                1L, 2L,
+        Booking booking = new Booking(
+                1L,
                 LocalDateTime.of(2023, 12, 25, 12, 0),
-                LocalDateTime.of(2023, 12, 26, 12, 0)
+                LocalDateTime.of(2023, 12, 26, 12, 0),
+                new Item(),
+                new User(2L, "asd", "asd@asd.ew"),
+                BookingStatus.REJECTED
         );
+        bookingShortDto = BookingMapper.toShortBookingDto(booking);
     }
 
     @Test
