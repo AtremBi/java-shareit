@@ -12,6 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingInputDto;
+import ru.practicum.shareit.exeptions.ChangeStatusException;
+import ru.practicum.shareit.exeptions.ItemUnavailable;
 import ru.practicum.shareit.exeptions.NotFoundException;
 import ru.practicum.shareit.exeptions.ValidationException;
 import ru.practicum.shareit.item.ItemService;
@@ -47,8 +49,6 @@ public class BookingServiceTest {
     private UserDto userDto2 = new UserDto(302L, getRandomString(), getRandomEmail());
     private ItemDto itemDto1 = new ItemDto(301L, getRandomString(), getRandomString(), true,
             user.getId(), null, null, null);
-    private ItemDto itemDto2 = new ItemDto(302L, getRandomString(), getRandomString(), true,
-            user.getId(), null, null, null);
 
     private String getRandomEmail() {
         RandomString randomString = new RandomString();
@@ -58,6 +58,88 @@ public class BookingServiceTest {
     private String getRandomString() {
         RandomString randomString = new RandomString();
         return randomString.nextString();
+    }
+
+    @Test
+    void shouldException_whenNotValidTime(){
+        UserDto ownerDto = userService.createUser(userDto1);
+        UserDto newUserDto = userService.createUser(userDto2);
+        ItemDto newItemDto = itemService.createItem(ownerDto.getId(), itemDto1);
+        BookingInputDto bookingInputDto = new BookingInputDto(
+                newItemDto.getId(),
+                LocalDateTime.of(2012, 12, 25, 12, 0, 0),
+                LocalDateTime.of(2013, 12, 26, 12, 0, 0));
+        ItemUnavailable exp = assertThrows(ItemUnavailable.class,
+                () -> bookingService.create(bookingInputDto, newUserDto.getId()).getId());
+        assertEquals("Не верно указан временной промежуток / во временном промежутке указан null",
+                exp.getMessage());
+    }
+
+    @Test
+    void shouldUpdateBookingStatusApproved(){
+        UserDto ownerDto = userService.createUser(userDto1);
+        UserDto newUserDto = userService.createUser(userDto2);
+        ItemDto newItemDto = itemService.createItem(ownerDto.getId(), itemDto1);
+        BookingInputDto bookingInputDto = new BookingInputDto(
+                newItemDto.getId(),
+                LocalDateTime.of(2030, 12, 25, 12, 0, 0),
+                LocalDateTime.of(2030, 12, 26, 12, 0, 0));
+        Long bookingId = bookingService.create(bookingInputDto, newUserDto.getId()).getId();
+        bookingService.update(ownerDto.getId(), true, bookingId);
+        List<BookingDto> listBookings = bookingService.getBookings(newUserDto.getId(), "ALL", 0, null);
+        assertEquals(BookingStatus.APPROVED, listBookings.get(0).getStatus());
+    }
+
+    @Test
+    void shouldException_whenReplayUpdateBooking(){
+        UserDto ownerDto = userService.createUser(userDto1);
+        UserDto newUserDto = userService.createUser(userDto2);
+        ItemDto newItemDto = itemService.createItem(ownerDto.getId(), itemDto1);
+        BookingInputDto bookingInputDto = new BookingInputDto(
+                newItemDto.getId(),
+                LocalDateTime.of(2030, 12, 25, 12, 0, 0),
+                LocalDateTime.of(2030, 12, 26, 12, 0, 0));
+        Long bookingId = bookingService.create(bookingInputDto, newUserDto.getId()).getId();
+        bookingService.update(ownerDto.getId(), true, bookingId);
+        ChangeStatusException exp = assertThrows(ChangeStatusException.class,
+                () -> bookingService.update(ownerDto.getId(), true, bookingId));
+        assertEquals("Повторно изменить статус нельзя",
+                exp.getMessage());
+    }
+
+    @Test
+    void shouldException_whenNotBookerUpdate(){
+        UserDto ownerDto = userService.createUser(userDto1);
+        UserDto newUserDto = userService.createUser(userDto2);
+        ItemDto newItemDto = itemService.createItem(ownerDto.getId(), itemDto1);
+        BookingInputDto bookingInputDto = new BookingInputDto(
+                newItemDto.getId(),
+                LocalDateTime.of(2030, 12, 25, 12, 0, 0),
+                LocalDateTime.of(2030, 12, 26, 12, 0, 0));
+        Long bookingId = bookingService.create(bookingInputDto, newUserDto.getId()).getId();
+        NotFoundException exp = assertThrows(NotFoundException.class,
+                () -> bookingService.update(newUserDto.getId(), true, bookingId));
+        assertEquals("Только владелец может подтвердить бронирование",
+                exp.getMessage());
+    }
+
+    @Test
+    void shouldException_whenNotBookerUpdate2(){
+        UserDto ownerDto = userService.createUser(userDto1);
+        UserDto newUserDto = userService.createUser(userDto2);
+        userDto2.setId(322L);
+        userDto2.setEmail(getRandomEmail());
+        UserDto newUserDto2 = userService.createUser(userDto2);
+        ItemDto newItemDto = itemService.createItem(ownerDto.getId(), itemDto1);
+        BookingInputDto bookingInputDto = new BookingInputDto(
+                newItemDto.getId(),
+                LocalDateTime.of(2030, 12, 25, 12, 0, 0),
+                LocalDateTime.of(2030, 12, 26, 12, 0, 0));
+        Long bookingId = bookingService.create(bookingInputDto, newUserDto.getId()).getId();
+        ValidationException exp = assertThrows(ValidationException.class,
+                () -> bookingService.update(newUserDto2.getId(), true, bookingId));
+        assertEquals("Подтвердить бронирование может только владелец",
+                exp.getMessage());
     }
 
     @Test
