@@ -68,7 +68,7 @@ public class BookingMapperTest {
     }
 
     @Test
-    void toBookingFromBookingDto(){
+    void toBookingFromBookingDto() {
         Booking booking1 = new Booking(
                 1L,
                 LocalDateTime.of(2023, 12, 25, 12, 0),
