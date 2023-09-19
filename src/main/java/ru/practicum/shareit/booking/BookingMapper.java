@@ -49,18 +49,6 @@ public class BookingMapper {
         );
     }
 
-    public static Booking toBooking(Long bookerId, ShortBookingDto booking,
-                                    ItemService itemService, UserService userService) {
-        return new Booking(
-                null,
-                booking.getStart(),
-                booking.getEnd(),
-                itemService.findItemById(booking.getId()),
-                userService.findUserById(bookerId),
-                BookingStatus.WAITING
-        );
-    }
-
     public static Booking toBooking(Long bookerId, BookingInputDto booking,
                                     ItemService itemService, UserService userService) {
         return new Booking(

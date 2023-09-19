@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -70,8 +71,44 @@ public class BookingServiceTest {
                 LocalDateTime.of(2012, 12, 25, 12, 0, 0),
                 LocalDateTime.of(2013, 12, 26, 12, 0, 0));
         ItemUnavailable exp = assertThrows(ItemUnavailable.class,
-                () -> bookingService.create(bookingInputDto, newUserDto.getId()).getId());
+                () -> bookingService.create(bookingInputDto, newUserDto.getId()));
         assertEquals("Не верно указан временной промежуток / во временном промежутке указан null",
+                exp.getMessage());
+    }
+
+    @Test
+    void shouldException_whenUpdate_setStatusRejected() {
+        UserDto ownerDto = userService.createUser(userDto1);
+        UserDto newUserDto = userService.createUser(userDto2);
+        ItemDto newItemDto = itemService.createItem(ownerDto.getId(), itemDto1);
+        BookingInputDto bookingInputDto = new BookingInputDto(
+                newItemDto.getId(),
+                LocalDateTime.of(2030, 12, 25, 12, 0, 0),
+                LocalDateTime.of(2030, 12, 26, 12, 0, 0));
+        Long bookingId = bookingService.create(bookingInputDto, newUserDto.getId()).getId();
+        bookingService.update(newUserDto.getId(), false, bookingId);
+        List<BookingDto> listBookings = bookingService.getBookings(newUserDto.getId(), "ALL", 0, null);
+        assertEquals(BookingStatus.CANCELED, listBookings.get(0).getStatus());
+    }
+
+    @Test
+    void shouldException_whenUpdate_TimeOff() {
+        UserDto ownerDto = userService.createUser(userDto1);
+        UserDto newUserDto = userService.createUser(userDto2);
+        ItemDto newItemDto = itemService.createItem(ownerDto.getId(), itemDto1);
+        BookingInputDto bookingInputDto = new BookingInputDto(
+                newItemDto.getId(),
+                LocalDateTime.now().plusSeconds(1),
+                LocalDateTime.now().plusSeconds(3));
+        Long bookingId = bookingService.create(bookingInputDto, newUserDto.getId()).getId();
+        try {
+            sleep(5000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        ValidationException exp = assertThrows(ValidationException.class,
+                () -> bookingService.update(ownerDto.getId(), true, bookingId));
+        assertEquals("Время бронирования вышло",
                 exp.getMessage());
     }
 

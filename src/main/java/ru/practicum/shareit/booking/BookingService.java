@@ -51,7 +51,7 @@ public class BookingService {
     public BookingDto update(Long userId, Boolean approved, Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронирование не найдено"));
-        if (booking.getEnd().equals(LocalDateTime.now())) {
+        if (booking.getEnd().isBefore(LocalDateTime.now())) {
             throw new ValidationException("Время бронирования вышло");
         }
 

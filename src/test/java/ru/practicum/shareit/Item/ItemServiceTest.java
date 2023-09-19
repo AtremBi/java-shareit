@@ -146,7 +146,7 @@ public class ItemServiceTest {
     }
 
     @Test
-    void shouldException_whenCreateCommentWhenUserNotBooker() {
+    void shouldException_whenCreateComment_whenUserNotBooker() {
         UserDto ownerDto = userService.createUser(userDto1);
         UserDto newUserDto = userService.createUser(userDto2);
         CommentDto commentDto = new CommentDto(1L, "Comment1", itemMapper.toItem(ownerDto.getId(), itemDto),

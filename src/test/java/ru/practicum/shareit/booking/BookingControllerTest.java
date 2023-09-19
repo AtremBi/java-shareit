@@ -10,6 +10,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingInputDto;
+import ru.practicum.shareit.exeptions.AlreadyExistException;
+import ru.practicum.shareit.exeptions.NotFoundException;
+import ru.practicum.shareit.exeptions.WrongUserException;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.user.User;
 
@@ -63,6 +66,48 @@ public class BookingControllerTest {
     private String getRandomString() {
         RandomString randomString = new RandomString();
         return randomString.nextString();
+    }
+
+    @Test
+    void whenThrowWrongUserException_return409Status() throws Exception {
+        when(bookingService.create(any(), any(Long.class)))
+                .thenThrow(new WrongUserException("test"));
+
+        mvc.perform(post("/bookings")
+                        .content(mapper.writeValueAsString(bookingInputDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(USER_ID, 1))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void whenThrowAlreadyExistException_return409Status() throws Exception {
+        when(bookingService.create(any(), any(Long.class)))
+                .thenThrow(new AlreadyExistException("test"));
+
+        mvc.perform(post("/bookings")
+                        .content(mapper.writeValueAsString(bookingInputDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(USER_ID, 1))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void whenThrowNotFoundException_return404Status() throws Exception {
+        when(bookingService.create(any(), any(Long.class)))
+                .thenThrow(new NotFoundException("test"));
+
+        mvc.perform(post("/bookings")
+                        .content(mapper.writeValueAsString(bookingInputDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(USER_ID, 1))
+                .andExpect(status().isNotFound());
     }
 
     @Test

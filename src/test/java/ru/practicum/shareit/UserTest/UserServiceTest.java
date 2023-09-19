@@ -42,7 +42,6 @@ public class UserServiceTest {
     private UserMapper mapper = new UserMapper();
     private UserDto userDto = new UserDto(1L, getRandomString(), getRandomEmail());
     private final UserService userService;
-    //    private final UserMapper mapper;
     private User user = new User(1L, getRandomString(), getRandomEmail());
 
     @BeforeEach
