@@ -49,7 +49,7 @@ public class ItemService {
         if (size == null) {
             size = 20;
         }
-        PageRequest pageRequest = PageRequest.of(from / size, size, Sort.Direction.DESC, "name");
+        PageRequest pageRequest = PageRequest.of(from / size, size, Sort.Direction.ASC, "name");
         if (text.isBlank()) {
             return new ArrayList<>();
         }
