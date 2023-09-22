@@ -12,24 +12,15 @@ import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.user.User;
 
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @JsonTest
 public class BookingDtoTest {
+    @Autowired
     private JacksonTester<BookingDto> json;
     private BookingDto bookingDto;
-    private Validator validator;
-
-    public BookingDtoTest(@Autowired JacksonTester<BookingDto> json) {
-        this.json = json;
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        validator = factory.getValidator();
-    }
 
     @BeforeEach
     void beforeEach() {

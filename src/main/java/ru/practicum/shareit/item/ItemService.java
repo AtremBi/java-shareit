@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.Pagination.Pagination;
 import ru.practicum.shareit.ServiceUtil;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingStatus;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toList;
 
 @Service
+@Transactional
 public class ItemService {
     private final ItemRepository itemStorage;
     private final CommentRepository commentRepository;
@@ -46,10 +49,7 @@ public class ItemService {
     }
 
     public List<ItemDto> searchItems(String text, Integer from, Integer size) {
-        if (size == null) {
-            size = 20;
-        }
-        PageRequest pageRequest = PageRequest.of(from / size, size, Sort.Direction.ASC, "name");
+        PageRequest pageRequest = Pagination.of(from, size, Sort.Direction.ASC, "name");
         if (text.isBlank()) {
             return new ArrayList<>();
         }
@@ -57,6 +57,7 @@ public class ItemService {
                 .map(itemMapper::toItemDto).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public ItemDto getItemById(Long itemId, Long userId) {
         Item item = findItemById(itemId);
         ItemDto itemDto;
@@ -76,17 +77,20 @@ public class ItemService {
         return itemDto;
     }
 
+    @Transactional(readOnly = true)
     public Item findItemById(Long itemId) {
         return itemStorage.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Вещь не найдена"));
     }
 
+    @Transactional(readOnly = true)
     public List<ItemDto> getItemsByRequestId(Long requestId) {
         return itemMapper.toItemDto(itemStorage.findByRequestId(requestId));
     }
 
+    @Transactional(readOnly = true)
     public List<ItemDto> getItems(Long userId, Integer from, Integer size) {
-        PageRequest pageRequest = PageRequest.of(from / size, size, Sort.Direction.DESC, "name");
+        PageRequest pageRequest = Pagination.of(from, size, Sort.Direction.DESC, "name");
         return itemMapper.toItemDtoWithLastAndEndNextBooking(itemStorage.findItemByOwnerId(userId, pageRequest).stream()
                 .sorted(Comparator.comparing(Item::getId))
                 .collect(toList()));
@@ -128,7 +132,7 @@ public class ItemService {
         return itemMapper.toCommentDto(commentRepository.save(comment));
     }
 
-
+    @Transactional(readOnly = true)
     public List<CommentDto> getCommentsByItemId(Long itemId) {
         return commentRepository.findAllByItemId(itemId,
                         Sort.by(Sort.Direction.DESC, "created")).stream()

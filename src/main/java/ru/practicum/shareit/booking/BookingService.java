@@ -1,10 +1,12 @@
 package ru.practicum.shareit.booking;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.Pagination.Pagination;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingInputDto;
 import ru.practicum.shareit.booking.dto.ShortBookingDto;
@@ -22,18 +24,15 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
+@RequiredArgsConstructor
 public class BookingService {
-    private final BookingRepository bookingRepository;
-    private final UserService userService;
-    private final ItemService itemService;
-
     @Autowired
-    public BookingService(BookingRepository bookingRepository, UserService userService,
-                          ItemService itemService) {
-        this.bookingRepository = bookingRepository;
-        this.userService = userService;
-        this.itemService = itemService;
-    }
+    private final BookingRepository bookingRepository;
+    @Autowired
+    private final UserService userService;
+    @Autowired
+    private final ItemService itemService;
 
     public BookingDto create(BookingInputDto bookingInputDto, Long bookerId) {
         Item itemId = itemService.findItemById(bookingInputDto.getItemId());
@@ -77,6 +76,7 @@ public class BookingService {
         return BookingMapper.toBookingDto(bookingRepository.save(booking));
     }
 
+    @Transactional(readOnly = true)
     public BookingDto getBookingById(Long bookingId, Long userId) {
         userService.findUserById(userId);
         BookingDto bookingDto = BookingMapper.toBookingDto(bookingRepository.findById(bookingId)
@@ -88,84 +88,89 @@ public class BookingService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<BookingDto> getBookings(Long userId, String state, Integer from, Integer size) {
         userService.findUserById(userId);
-        if (size == null) {
-            size = 20;
-        }
         fromAndSizeValidation(from, size);
         PageRequest pageRequest;
 
-        pageRequest = PageRequest.of(from / size, size, Sort.Direction.DESC, "start");
-        if (state == null) {
-            state = "ALL";
-        }
+        pageRequest = Pagination.of(from, size, Sort.Direction.DESC, "start");
+        List<Booking> bookings;
         switch (state) {
             case "ALL":
-                return bookingRepository.findAllByBookerId(userId, pageRequest)
-                        .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
+                bookings = bookingRepository.findAllByBookerId(userId, pageRequest)
+                        .stream().collect(Collectors.toList());
+                break;
             case "FUTURE":
-                return bookingRepository
+                bookings = bookingRepository
                         .findByBookerIdAndStartIsAfter(userId, LocalDateTime.now(), pageRequest)
-                        .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
+                        .stream().collect(Collectors.toList());
+                break;
             case "WAITING":
-                return bookingRepository
+                bookings = bookingRepository
                         .findByBookerIdAndStatus(userId, BookingStatus.WAITING, pageRequest)
-                        .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
+                        .stream().collect(Collectors.toList());
+                break;
             case "REJECTED":
-                return bookingRepository
+                bookings = bookingRepository
                         .findByBookerIdAndStatus(userId, BookingStatus.REJECTED, pageRequest)
-                        .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
+                        .stream().collect(Collectors.toList());
+                break;
             case "CURRENT":
-                return bookingRepository
+                bookings = bookingRepository
                         .findByBookerIdAndStartIsBeforeAndEndIsAfter(userId, LocalDateTime.now(),
                                 LocalDateTime.now(), pageRequest)
-                        .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
+                        .stream().collect(Collectors.toList());
+                break;
             case "PAST":
-                return bookingRepository
+                bookings = bookingRepository
                         .findByBookerIdAndEndIsBefore(userId, LocalDateTime.now(), pageRequest)
-                        .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
+                        .stream().collect(Collectors.toList());
+                break;
             default:
                 throw new ValidationException("Unknown state: " + state);
         }
-
+        return BookingMapper.toBookingDto(bookings);
     }
 
+    @Transactional(readOnly = true)
     public List<BookingDto> getBookingsByOwner(Long userId, String state, Integer from, Integer size) {
         userService.findUserById(userId);
-        if (size == null) {
-            size = 20;
-        }
         fromAndSizeValidation(from, size);
-        PageRequest pageRequest = PageRequest.of(from / size, size, Sort.Direction.DESC, "start");
-        if (state == null) {
-            state = "ALL";
-        }
+        PageRequest pageRequest = Pagination.of(from, size, Sort.Direction.DESC, "start");
+        List<Booking> bookings;
         switch (state) {
             case "ALL":
-                return bookingRepository.findAllByItemOwnerId(userId, pageRequest)
-                        .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
+                bookings = bookingRepository.findAllByItemOwnerId(userId, pageRequest)
+                        .stream().collect(Collectors.toList());
+                break;
             case "FUTURE":
-                return bookingRepository
+                bookings = bookingRepository
                         .findByItemOwnerIdAndStartIsAfter(userId, LocalDateTime.now(), pageRequest)
-                        .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
+                        .stream().collect(Collectors.toList());
+                break;
             case "WAITING":
-                return bookingRepository.findByItemOwnerIdAndStatus(userId, BookingStatus.WAITING, pageRequest)
-                        .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
-
+                bookings = bookingRepository.findByItemOwnerIdAndStatus(userId, BookingStatus.WAITING, pageRequest)
+                        .stream().collect(Collectors.toList());
+                break;
             case "REJECTED":
-                return bookingRepository.findByItemOwnerIdAndStatus(userId, BookingStatus.REJECTED, pageRequest)
-                        .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
+                bookings = bookingRepository.findByItemOwnerIdAndStatus(userId, BookingStatus.REJECTED, pageRequest)
+                        .stream().collect(Collectors.toList());
+                break;
             case "CURRENT":
-                return bookingRepository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfter(userId, LocalDateTime.now(),
+                bookings = bookingRepository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfter(userId, LocalDateTime.now(),
                                 LocalDateTime.now(), pageRequest)
-                        .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
+                        .stream().collect(Collectors.toList());
+                break;
             case "PAST":
-                return bookingRepository.findByItemOwnerIdAndEndIsBefore(userId, LocalDateTime.now(), pageRequest)
-                        .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
+                bookings = bookingRepository.findByItemOwnerIdAndEndIsBefore(userId, LocalDateTime.now(), pageRequest)
+                        .stream().collect(Collectors.toList());
+                break;
             default:
                 throw new ValidationException("Unknown state: " + state);
+
         }
+        return BookingMapper.toBookingDto(bookings);
     }
 
     @Transactional(readOnly = true)

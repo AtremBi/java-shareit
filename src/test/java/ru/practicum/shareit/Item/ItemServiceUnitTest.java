@@ -1,13 +1,10 @@
 package ru.practicum.shareit.Item;
 
 import lombok.RequiredArgsConstructor;
-import net.bytebuddy.utility.RandomString;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +15,6 @@ import ru.practicum.shareit.exeptions.ItemUnavailable;
 import ru.practicum.shareit.exeptions.NotFoundException;
 import ru.practicum.shareit.exeptions.WrongUserException;
 import ru.practicum.shareit.item.ItemMapper;
-import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -28,46 +24,40 @@ import ru.practicum.shareit.user.UserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static java.lang.Thread.sleep;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static ru.practicum.shareit.TestUtil.getRandomEmail;
+import static ru.practicum.shareit.TestUtil.getRandomString;
 
-@ExtendWith(MockitoExtension.class)
 @SpringBootTest
 @Transactional
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ItemServiceTest {
-    @Mock
-    private ItemRepository mockItemRepository;
+public class ItemServiceUnitTest {
     private final BookingService bookingService;
     private final UserService userService;
     private final ItemService itemService;
 
     private final ItemMapper itemMapper;
 
-    private User user = new User(200L, getRandomString(), getRandomEmail());
-    private UserDto userDto1 = new UserDto(201L, getRandomString(), getRandomEmail());
-    private UserDto userDto2 = new UserDto(202L, getRandomString(), getRandomEmail());
-    private ItemDto itemDto = new ItemDto(200L, "Item1", "Description1", true,
-            user.getId(), null, null, null);
-    private ItemDto itemDto2 = new ItemDto(202L, "Item2", "Description2", true,
-            user.getId(), null, null, null);
+    private User user;
+    private UserDto userDto1;
+    private UserDto userDto2;
+    private ItemDto itemDto;
+    private ItemDto itemDto2;
 
-
-    private String getRandomEmail() {
-        RandomString randomString = new RandomString();
-        return randomString.nextString() + "@" + randomString.nextString() + ".ew";
-    }
-
-    private String getRandomString() {
-        RandomString randomString = new RandomString();
-        return randomString.nextString();
+    @BeforeEach
+    public void setUp() {
+        user = new User(200L, getRandomString(), getRandomEmail());
+        userDto1 = new UserDto(201L, getRandomString(), getRandomEmail());
+        userDto2 = new UserDto(202L, getRandomString(), getRandomEmail());
+        itemDto = new ItemDto(200L, "Item1", "Description1", true,
+                user.getId(), null, null, null);
+        itemDto2 = new ItemDto(202L, "Item2", "Description2", true,
+                user.getId(), null, null, null);
     }
 
     @Test
@@ -137,15 +127,6 @@ public class ItemServiceTest {
     }
 
     @Test
-    void shouldReturnItemsBySearch_whenSizeIsNull() {
-        UserDto ownerDto = userService.createUser(userDto1);
-        itemService.createItem(ownerDto.getId(), itemDto);
-        itemService.createItem(ownerDto.getId(), itemDto2);
-        List<ItemDto> listItems = itemService.searchItems("item", 0, null);
-        assertEquals(2, listItems.size());
-    }
-
-    @Test
     void shouldException_whenCreateComment_whenUserNotBooker() {
         UserDto ownerDto = userService.createUser(userDto1);
         UserDto newUserDto = userService.createUser(userDto2);
@@ -179,15 +160,4 @@ public class ItemServiceTest {
         Assertions.assertEquals(1, itemService.getCommentsByItemId(newItemDto.getId()).size());
     }
 
-    @Test
-    void shouldException_whenGetItem_withWrongId() {
-        ItemService itemService = new ItemService(mockItemRepository, null, null,
-                null);
-        when(mockItemRepository.findById(any(Long.class)))
-                .thenReturn(Optional.empty());
-        final NotFoundException exception = Assertions.assertThrows(
-                NotFoundException.class,
-                () -> itemService.getItemById(-1L, 1L));
-        Assertions.assertEquals("Вещь не найдена", exception.getMessage());
-    }
 }

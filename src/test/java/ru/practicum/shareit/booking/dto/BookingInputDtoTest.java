@@ -20,7 +20,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 public class BookingInputDtoTest {
     private JacksonTester<BookingInputDto> json;
     private BookingInputDto bookingInputDto;
-    private Validator validator;
+    private final Validator validator;
 
     public BookingInputDtoTest(@Autowired JacksonTester<BookingInputDto> json) {
         this.json = json;

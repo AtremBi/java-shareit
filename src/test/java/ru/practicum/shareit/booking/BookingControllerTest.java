@@ -1,7 +1,6 @@
 package ru.practicum.shareit.booking;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.bytebuddy.utility.RandomString;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -10,9 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingInputDto;
-import ru.practicum.shareit.exeptions.AlreadyExistException;
-import ru.practicum.shareit.exeptions.NotFoundException;
-import ru.practicum.shareit.exeptions.WrongUserException;
+import ru.practicum.shareit.exeptions.*;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.user.User;
 
@@ -28,14 +25,16 @@ import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static ru.practicum.shareit.TestUtil.getRandomEmail;
+import static ru.practicum.shareit.TestUtil.getRandomString;
 
 @WebMvcTest(controllers = BookingController.class)
 public class BookingControllerTest {
     @Autowired
-    ObjectMapper mapper;
+    private ObjectMapper mapper;
 
     @MockBean
-    BookingService bookingService;
+    private BookingService bookingService;
 
     @Autowired
     private MockMvc mvc;
@@ -58,14 +57,46 @@ public class BookingControllerTest {
 
     private List listBookingDto = new ArrayList<>();
 
-    private String getRandomEmail() {
-        RandomString randomString = new RandomString();
-        return randomString.nextString() + "@" + randomString.nextString() + ".ew";
+    @Test
+    void whenThrowItemUnavailable_return400Status() throws Exception {
+        when(bookingService.create(any(), any(Long.class)))
+                .thenThrow(new ItemUnavailable("test"));
+
+        mvc.perform(post("/bookings")
+                        .content(mapper.writeValueAsString(bookingInputDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(USER_ID, 1))
+                .andExpect(status().isBadRequest());
     }
 
-    private String getRandomString() {
-        RandomString randomString = new RandomString();
-        return randomString.nextString();
+    @Test
+    void whenThrowValidationException_return500Status() throws Exception {
+        when(bookingService.update(any(Long.class), any(Boolean.class), any(Long.class)))
+                .thenThrow(new ValidationException("test"));
+
+        mvc.perform(patch("/bookings/1")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .param("approved", "1")
+                        .header(USER_ID, 1))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void whenThrowWrongUserException_return400Status() throws Exception {
+        when(bookingService.update(any(Long.class), any(Boolean.class), any(Long.class)))
+                .thenThrow(new ChangeStatusException("test"));
+
+        mvc.perform(patch("/bookings/1")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .param("approved", "1")
+                        .header(USER_ID, 1))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

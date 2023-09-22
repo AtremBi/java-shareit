@@ -1,7 +1,6 @@
 package ru.practicum.shareit.UserTest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.bytebuddy.utility.RandomString;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -20,14 +19,16 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static ru.practicum.shareit.TestUtil.getRandomEmail;
+import static ru.practicum.shareit.TestUtil.getRandomString;
 
 @WebMvcTest(controllers = UserController.class)
 public class UserControllerTest {
     @Autowired
-    ObjectMapper mapper;
+    private ObjectMapper mapper;
 
     @MockBean
-    UserService userService;
+    private UserService userService;
 
     @Autowired
     private MockMvc mvc;
@@ -36,16 +37,6 @@ public class UserControllerTest {
     private List<UserDto> listUserDto = List.of(
             new UserDto(null, getRandomString(), getRandomEmail()),
             new UserDto(null, getRandomString(), getRandomEmail()));
-
-    private String getRandomEmail() {
-        RandomString randomString = new RandomString();
-        return randomString.nextString() + "@" + randomString.nextString() + ".ew";
-    }
-
-    private String getRandomString() {
-        RandomString randomString = new RandomString();
-        return randomString.nextString();
-    }
 
     @Test
     void createUser() throws Exception {

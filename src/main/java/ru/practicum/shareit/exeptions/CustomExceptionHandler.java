@@ -70,7 +70,7 @@ public class CustomExceptionHandler {
         log.error(exception.getMessage(), exception);
         return ResponseError.builder()
                 .error(exception.getMessage())
-                .status(500)
+                .status(400)
                 .exception("ru.practicum.shareit.exceptions.ChangeStatusException")
                 .build();
     }

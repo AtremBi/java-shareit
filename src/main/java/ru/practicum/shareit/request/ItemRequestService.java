@@ -1,8 +1,10 @@
 package ru.practicum.shareit.request;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.ServiceUtil;
 import ru.practicum.shareit.exeptions.NotFoundException;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
@@ -12,11 +14,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
+@Transactional
+@RequiredArgsConstructor
 public class ItemRequestService {
+    @Autowired
     private final ItemRequestRepository itemRequestRepository;
+    @Autowired
     private final ItemRequestMapper mapper;
-
+    @Autowired
     private final ServiceUtil serviceUtil;
 
     public ItemRequestDto createRequest(Long requestorId, ItemRequestDto itemRequestDto, LocalDateTime created) {
@@ -26,11 +31,13 @@ public class ItemRequestService {
         return mapper.itemRequestDto(itemRequestRepository.save(itemRequest));
     }
 
+    @Transactional(readOnly = true)
     public List<ItemRequestDto> getRequests(Long requestorId) {
         serviceUtil.getUserService().findUserById(requestorId);
         return mapper.itemRequestDto(itemRequestRepository.findByRequestorId(requestorId));
     }
 
+    @Transactional(readOnly = true)
     public List<ItemRequestDto> getAllRequests(Integer from, Integer size, Long requestorId) {
         serviceUtil.getUserService().findUserById(requestorId);
         if (from != null && size != null) {
@@ -41,6 +48,7 @@ public class ItemRequestService {
         }
     }
 
+    @Transactional(readOnly = true)
     public ItemRequestDto getRequestById(Long requestId, Long userId) {
         serviceUtil.getUserService().findUserById(userId);
         return mapper.itemRequestDto(itemRequestRepository.findById(requestId)

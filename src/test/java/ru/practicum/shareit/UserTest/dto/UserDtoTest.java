@@ -1,6 +1,5 @@
 package ru.practicum.shareit.UserTest.dto;
 
-import net.bytebuddy.utility.RandomString;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,13 +15,15 @@ import javax.validation.ValidatorFactory;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static ru.practicum.shareit.TestUtil.getRandomEmail;
+import static ru.practicum.shareit.TestUtil.getRandomString;
 
 @JsonTest
 public class UserDtoTest {
 
     private JacksonTester<UserDto> json;
     private UserDto userDto;
-    private Validator validator;
+    private final Validator validator;
 
     public UserDtoTest(@Autowired JacksonTester<UserDto> json) {
         this.json = json;
@@ -37,16 +38,6 @@ public class UserDtoTest {
                 getRandomString(),
                 getRandomEmail()
         );
-    }
-
-    private String getRandomEmail() {
-        RandomString randomString = new RandomString();
-        return randomString.nextString() + "@" + randomString.nextString() + ".ew";
-    }
-
-    private String getRandomString() {
-        RandomString randomString = new RandomString();
-        return randomString.nextString();
     }
 
     @Test
@@ -64,7 +55,7 @@ public class UserDtoTest {
         userDto.setEmail(" ");
         Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
         assertThat(violations).isNotEmpty();
-        assertThat(violations.toString()).contains("'must be a well-formed email address");
+        assertThat(violations.toString()).contains("должно иметь формат адреса электронной почты");
     }
 
     @Test
@@ -72,6 +63,6 @@ public class UserDtoTest {
         userDto.setEmail(null);
         Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
         assertThat(violations).isNotEmpty();
-        assertThat(violations.toString()).contains("must not be null");
+        assertThat(violations.toString()).contains("не должно равняться null");
     }
 }

@@ -2,8 +2,10 @@ package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exeptions.AlreadyExistException;
 import ru.practicum.shareit.exeptions.NotFoundException;
 import ru.practicum.shareit.user.Dto.UserDto;
@@ -13,7 +15,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class UserService {
+    @Autowired
     private final UserRepository userStorage;
 
     public UserDto createUser(UserDto userDto) {
@@ -25,16 +29,19 @@ public class UserService {
         }
     }
 
+    @Transactional(readOnly = true)
     public UserDto getUserById(Long userId) {
         return UserMapper.toUserDto(userStorage.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден")));
     }
 
+    @Transactional(readOnly = true)
     public User findUserById(Long userId) {
         return userStorage.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
     }
 
+    @Transactional(readOnly = true)
     public List<UserDto> getUsers() {
         return UserMapper.toUserDto(userStorage.findAll());
     }

@@ -1,62 +1,40 @@
 package ru.practicum.shareit.UserTest;
 
 import lombok.RequiredArgsConstructor;
-import net.bytebuddy.utility.RandomString;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exeptions.AlreadyExistException;
 import ru.practicum.shareit.exeptions.NotFoundException;
 import ru.practicum.shareit.user.Dto.UserDto;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserMapper;
-import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.UserService;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static ru.practicum.shareit.TestUtil.getRandomEmail;
+import static ru.practicum.shareit.TestUtil.getRandomString;
 
 @SpringBootTest
 @Transactional
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@ExtendWith(MockitoExtension.class)
-public class UserServiceTest {
-    @Mock
-    private UserRepository mockUserRepository;
-    private UserService userServiceWithMock;
+public class UserServiceUnitTest {
     private UserMapper mapper = new UserMapper();
-    private UserDto userDto = new UserDto(1L, getRandomString(), getRandomEmail());
+    private UserDto userDto;
     private final UserService userService;
-    private User user = new User(1L, getRandomString(), getRandomEmail());
+    private User user;
 
     @BeforeEach
     void seyUp() {
-        userServiceWithMock = new UserService(mockUserRepository);
-    }
-
-    private String getRandomEmail() {
-        RandomString randomString = new RandomString();
-        return randomString.nextString() + "@" + randomString.nextString() + ".ew";
-    }
-
-    private String getRandomString() {
-        RandomString randomString = new RandomString();
-        return randomString.nextString();
+        userDto = new UserDto(1L, getRandomString(), getRandomEmail());
+        user = new User(1L, getRandomString(), getRandomEmail());
     }
 
     @Test
@@ -110,35 +88,4 @@ public class UserServiceTest {
                 exception.getMessage());
     }
 
-    @Test
-    void shouldException_whenGetUser_withWrongId() {
-        when(mockUserRepository.findById(any(Long.class)))
-                .thenReturn(Optional.empty());
-        final NotFoundException exception = assertThrows(
-                NotFoundException.class,
-                () -> userServiceWithMock.getUserById(-1L));
-        assertEquals("Пользователь не найден", exception.getMessage());
-    }
-
-    @Test
-    void shouldException_whenCreateUser_withExistEmail() {
-        when(mockUserRepository.save(any()))
-                .thenThrow(new DataIntegrityViolationException(""));
-        final AlreadyExistException exception = assertThrows(
-                AlreadyExistException.class,
-                () -> userServiceWithMock.createUser(userDto));
-        assertEquals("Пользователь с E-mail=" + userDto.getEmail() + " уже существует!",
-                exception.getMessage());
-    }
-
-    @Test
-    void shouldReturnUser_whenFindUserById() {
-        when(mockUserRepository.findById(any(Long.class)))
-                .thenReturn(Optional.of(mapper.toUser(userDto)));
-        User user = userServiceWithMock.findUserById(1L);
-        verify(mockUserRepository, Mockito.times(1))
-                .findById(1L);
-        assertThat(user.getName(), equalTo(userDto.getName()));
-        assertThat(user.getEmail(), equalTo(userDto.getEmail()));
-    }
 }
