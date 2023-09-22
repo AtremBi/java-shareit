@@ -301,7 +301,27 @@ public class BookingServiceUnitTest {
     }
 
     @Test
-    void shouldReturnBookings_whenGetBookingsInPastStatus_byBookerAndSizeIsNull() {
+    void shouldNotReturnBookings_whenGetBookingsInCurrentStatus_byOwner() {
+        UserDto ownerDto = userService.createUser(userDto1);
+        UserDto newUserDto = userService.createUser(userDto2);
+        ItemDto newItemDto = itemService.createItem(ownerDto.getId(), itemDto1);
+        BookingInputDto bookingInputDto = new BookingInputDto(
+                newItemDto.getId(),
+                LocalDateTime.of(2030, 12, 25, 12, 0, 0),
+                LocalDateTime.of(2030, 12, 26, 12, 0, 0));
+        bookingService.create(bookingInputDto, newUserDto.getId());
+        BookingInputDto bookingInputDto1 = new BookingInputDto(
+                newItemDto.getId(),
+                LocalDateTime.of(2031, 12, 25, 12, 0, 0),
+                LocalDateTime.of(2031, 12, 26, 12, 0, 0));
+        bookingService.create(bookingInputDto1, newUserDto.getId());
+        List<BookingDto> listBookings = bookingService.getBookingsByOwner(newUserDto.getId(), "CURRENT",
+                0, 20);
+        assertEquals(0, listBookings.size());
+    }
+
+    @Test
+    void shouldNotReturnBookings_whenGetBookingsInPastStatus_byBookerAndSize() {
         UserDto ownerDto = userService.createUser(userDto1);
         UserDto newUserDto = userService.createUser(userDto2);
         ItemDto newItemDto = itemService.createItem(ownerDto.getId(), itemDto1);
@@ -316,6 +336,26 @@ public class BookingServiceUnitTest {
                 LocalDateTime.of(2031, 12, 26, 12, 0, 0));
         bookingService.create(bookingInputDto1, newUserDto.getId());
         List<BookingDto> listBookings = bookingService.getBookings(newUserDto.getId(), "PAST",
+                0, 20);
+        assertEquals(0, listBookings.size());
+    }
+
+    @Test
+    void shouldNotReturnBookings_whenGetBookingsInPastStatus_byOwnerAndSize() {
+        UserDto ownerDto = userService.createUser(userDto1);
+        UserDto newUserDto = userService.createUser(userDto2);
+        ItemDto newItemDto = itemService.createItem(ownerDto.getId(), itemDto1);
+        BookingInputDto bookingInputDto = new BookingInputDto(
+                newItemDto.getId(),
+                LocalDateTime.of(2030, 12, 25, 12, 0, 0),
+                LocalDateTime.of(2030, 12, 26, 12, 0, 0));
+        bookingService.create(bookingInputDto, newUserDto.getId());
+        BookingInputDto bookingInputDto1 = new BookingInputDto(
+                newItemDto.getId(),
+                LocalDateTime.of(2031, 12, 25, 12, 0, 0),
+                LocalDateTime.of(2031, 12, 26, 12, 0, 0));
+        bookingService.create(bookingInputDto1, newUserDto.getId());
+        List<BookingDto> listBookings = bookingService.getBookingsByOwner(newUserDto.getId(), "PAST",
                 0, 20);
         assertEquals(0, listBookings.size());
     }
