@@ -31,8 +31,8 @@ public class ItemRepositoryTest {
     void setUp() {
         user = new User(null, TestUtil.getRandomString(), TestUtil.getRandomEmail());
         userRepository.save(user);
-        itemRepository.save(new Item(null, TestUtil.getRandomString(), "item 1 Oh"
-                , true, user.getId(), null));
+        itemRepository.save(new Item(null, TestUtil.getRandomString(), "item 1 Oh",
+                true, user.getId(), null));
         itemRepository.save(new Item(null, TestUtil.getRandomString(), "Soha",
                 true, user.getId(), null));
     }
