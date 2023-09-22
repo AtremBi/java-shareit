@@ -55,7 +55,7 @@ public class UserDtoTest {
         userDto.setEmail(" ");
         Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
         assertThat(violations).isNotEmpty();
-        assertThat(violations.toString()).contains("должно иметь формат адреса электронной почты");
+        assertThat(violations.toString()).contains("must be a well-formed email address");
     }
 
     @Test
@@ -63,6 +63,6 @@ public class UserDtoTest {
         userDto.setEmail(null);
         Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
         assertThat(violations).isNotEmpty();
-        assertThat(violations.toString()).contains("не должно равняться null");
+        assertThat(violations.toString()).contains("must not be null");
     }
 }
