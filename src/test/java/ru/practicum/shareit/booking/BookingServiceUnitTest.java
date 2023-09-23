@@ -148,11 +148,11 @@ public class BookingServiceUnitTest {
                 .thenReturn(user);
         when(bookingRepository.findAllByBookerId(any(Long.class), any()))
                 .thenReturn(new PageImpl<>(List.of(booking)));
-        when(bookingRepository.findByBookerIdAndStartIsAfter(any(Long.class),any(LocalDateTime.class), any()))
+        when(bookingRepository.findByBookerIdAndStartIsAfter(any(Long.class), any(LocalDateTime.class), any()))
                 .thenReturn(new PageImpl<>(List.of(futureBooking)));
         when(bookingRepository.findByBookerIdAndStatus(any(Long.class), any(BookingStatus.class), any()))
                 .thenReturn(new PageImpl<>(List.of(waitingBooking)));
-        when(bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfter(any(Long.class),any(LocalDateTime.class),
+        when(bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfter(any(Long.class), any(LocalDateTime.class),
                 any(LocalDateTime.class), any()))
                 .thenReturn(new PageImpl<>(List.of(pastBooking)));
         when(bookingRepository.findByBookerIdAndEndIsBefore(any(Long.class), any(LocalDateTime.class), any()))
@@ -181,6 +181,49 @@ public class BookingServiceUnitTest {
         assertEquals("from или size не должны быть отрицательными",
                 exp.getMessage());
     }
+
+
+    @Test
+    void getBookingsByOwner() {
+
+        when(userService.findUserById(any(Long.class)))
+                .thenReturn(user);
+        when(bookingRepository.findAllByItemOwnerId(any(Long.class), any()))
+                .thenReturn(new PageImpl<>(List.of(booking)));
+        when(bookingRepository.findByItemOwnerIdAndStartIsAfter(any(Long.class), any(LocalDateTime.class), any()))
+                .thenReturn(new PageImpl<>(List.of(futureBooking)));
+        when(bookingRepository.findByItemOwnerIdAndStatus(any(Long.class), any(BookingStatus.class), any()))
+                .thenReturn(new PageImpl<>(List.of(waitingBooking)));
+        when(bookingRepository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfter(any(Long.class), any(LocalDateTime.class),
+                any(LocalDateTime.class), any()))
+                .thenReturn(new PageImpl<>(List.of(pastBooking)));
+        when(bookingRepository.findByItemOwnerIdAndEndIsBefore(any(Long.class), any(LocalDateTime.class), any()))
+                .thenReturn(new PageImpl<>(List.of(currentBooking)));
+
+        List<BookingDto> listBookings1 = bookingService.getBookingsByOwner(user.getId(), "ALL", 0, 20);
+        assertEquals(BookingStatus.CANCELED, listBookings1.get(0).getStatus());
+
+        List<BookingDto> listBookings2 = bookingService.getBookingsByOwner(user.getId(), "FUTURE", 0, 20);
+        assertEquals(BookingStatus.APPROVED, listBookings2.get(0).getStatus());
+
+        List<BookingDto> listBookings3 = bookingService.getBookingsByOwner(user.getId(), "WAITING", 0, 20);
+        assertEquals(BookingStatus.WAITING, listBookings3.get(0).getStatus());
+
+        List<BookingDto> listBookings4 = bookingService.getBookingsByOwner(user.getId(), "PAST", 0, 20);
+        assertEquals(BookingStatus.APPROVED, listBookings4.get(0).getStatus());
+
+        List<BookingDto> listBookings5 = bookingService.getBookingsByOwner(user.getId(), "CURRENT", 0, 20);
+        assertEquals(BookingStatus.APPROVED, listBookings5.get(0).getStatus());
+
+        List<BookingDto> listBookings6 = bookingService.getBookingsByOwner(user.getId(), "REJECTED", 0, 20);
+        assertEquals(BookingStatus.WAITING, listBookings6.get(0).getStatus());
+
+        ValidationException exp = assertThrows(ValidationException.class,
+                () -> bookingService.getBookingsByOwner(user.getId(), "ALL", 0, -1));
+        assertEquals("from или size не должны быть отрицательными",
+                exp.getMessage());
+    }
+
 
     @Test
     void update() {
