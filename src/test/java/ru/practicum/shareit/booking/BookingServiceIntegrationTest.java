@@ -32,6 +32,7 @@ public class BookingServiceIntegrationTest {
     private UserDto userDto1;
     private UserDto userDto2;
     private ItemDto itemDto1;
+
     @BeforeEach
     public void setUp() {
         user = new User(300L, getRandomString(), getRandomEmail());

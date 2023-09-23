@@ -27,7 +27,7 @@ public class ItemServiceUnitTest {
     private ItemService itemService;
 
     @BeforeEach
-    public void setUp(){
+    public void setUp() {
         itemService = new ItemService(itemRepository, null, null,
                 null);
     }
