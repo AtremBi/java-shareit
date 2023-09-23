@@ -103,7 +103,8 @@ public class ItemServiceUnitTest {
         comment.setText(commentDto.getText());
         when(commentRepository.save(any()))
                 .thenReturn(comment);
-        Assertions.assertEquals(commentDto, itemService.addComment(commentDto, itemDto.getId(), user.getId()));
+        Assertions.assertEquals(commentDto.getText(),
+                itemService.addComment(commentDto, itemDto.getId(), user.getId()).getText());
     }
 
 }
