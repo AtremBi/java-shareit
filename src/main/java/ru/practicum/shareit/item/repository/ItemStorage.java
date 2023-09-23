@@ -1,4 +1,6 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.repository;
+
+import ru.practicum.shareit.item.Item;
 
 import java.util.List;
 

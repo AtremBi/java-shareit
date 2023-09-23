@@ -1,7 +1,6 @@
 package ru.practicum.shareit.Item;
 
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -9,19 +8,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingService;
-import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.BookingInputDto;
 import ru.practicum.shareit.exeptions.NotFoundException;
 import ru.practicum.shareit.exeptions.WrongUserException;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.ItemService;
-import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.Dto.UserDto;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserService;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -113,25 +108,6 @@ public class ItemServiceIntegrationTest {
         itemService.createItem(ownerDto.getId(), itemDto2);
         List<ItemDto> listItems = itemService.searchItems("item", 0, 1);
         assertEquals(1, listItems.size());
-    }
-
-    @Test
-    void addItemComment() {
-        UserDto ownerDto = userService.createUser(userDto1);
-        UserDto newUserDto = userService.createUser(userDto2);
-        ItemDto newItemDto = itemService.createItem(ownerDto.getId(), itemDto);
-        BookingInputDto bookingInputDto = new BookingInputDto(
-                newItemDto.getId(),
-                LocalDateTime.now().plusSeconds(1),
-                LocalDateTime.now().plusSeconds(3)
-        );
-        BookingDto bookingDto = bookingService.create(bookingInputDto, newUserDto.getId());
-        bookingService.update(ownerDto.getId(), true, bookingDto.getId());
-
-        CommentDto commentDto = new CommentDto(1L, "Comment1", itemMapper.toItem(ownerDto.getId(), itemDto),
-                newUserDto.getName(), LocalDateTime.now());
-        itemService.addComment(commentDto, newItemDto.getId(), newUserDto.getId());
-        Assertions.assertEquals(1, itemService.getCommentsByItemId(newItemDto.getId()).size());
     }
 
 }

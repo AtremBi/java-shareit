@@ -13,6 +13,7 @@ import ru.practicum.shareit.exeptions.ChangeStatusException;
 import ru.practicum.shareit.exeptions.ItemUnavailable;
 import ru.practicum.shareit.exeptions.NotFoundException;
 import ru.practicum.shareit.exeptions.ValidationException;
+import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -125,6 +126,8 @@ public class BookingServiceUnitTest {
         when(itemService.findItemById(any(Long.class)))
                 .thenReturn(itemMapper.toItem(user.getId(), itemDto1));
 
+        Item item = itemMapper.toItem(user.getId(), itemDto1);
+        item.setAvailable(false);
         BookingInputDto bookingInputDto = new BookingInputDto(
                 itemDto1.getId(),
                 LocalDateTime.of(2012, 12, 25, 12, 0, 0),
@@ -139,6 +142,14 @@ public class BookingServiceUnitTest {
                 () -> bookingService.create(bookingInputDto, user.getId()));
         assertEquals("Вещь не доступна для бронирования",
                 exp2.getMessage());
+
+        when(itemService.findItemById(any(Long.class)))
+                .thenReturn(item);
+
+        ItemUnavailable exp3 = assertThrows(ItemUnavailable.class,
+                () -> bookingService.create(bookingInputDto, 44L));
+        assertEquals("Вещь не доступна для бронирования",
+                exp3.getMessage());
     }
 
     @Test

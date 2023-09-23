@@ -15,6 +15,7 @@ import ru.practicum.shareit.exeptions.NotFoundException;
 import ru.practicum.shareit.exeptions.WrongUserException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.repository.CommentRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
