@@ -24,7 +24,6 @@ import ru.practicum.shareit.user.UserService;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static java.lang.Thread.sleep;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.*;
@@ -128,11 +127,7 @@ public class ItemServiceIntegrationTest {
         );
         BookingDto bookingDto = bookingService.create(bookingInputDto, newUserDto.getId());
         bookingService.update(ownerDto.getId(), true, bookingDto.getId());
-        try {
-            sleep(5000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+
         CommentDto commentDto = new CommentDto(1L, "Comment1", itemMapper.toItem(ownerDto.getId(), itemDto),
                 newUserDto.getName(), LocalDateTime.now());
         itemService.addComment(commentDto, newItemDto.getId(), newUserDto.getId());
