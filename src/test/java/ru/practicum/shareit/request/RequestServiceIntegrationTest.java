@@ -1,42 +1,82 @@
 package ru.practicum.shareit.request;
 
+import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.practicum.shareit.ServiceUtil;
-import ru.practicum.shareit.exeptions.NotFoundException;
-import ru.practicum.shareit.user.User;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.user.Dto.UserDto;
 import ru.practicum.shareit.user.UserService;
 
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static ru.practicum.shareit.TestUtil.getRandomEmail;
+import static ru.practicum.shareit.TestUtil.getRandomString;
 
 @SpringBootTest
-@ExtendWith(MockitoExtension.class)
+@Transactional
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class RequestServiceIntegrationTest {
-    @Mock
-    private ItemRequestRepository itemRequestRepository;
-    @Mock
-    private UserService userService;
+    private final ItemRequestService itemRequestService;
+    private final UserService userService;
+    public ItemRequestDto itemRequestDto;
+    public UserDto userDto1;
+    public UserDto userDto2;
+
+    @BeforeEach
+    void setUp() {
+        userDto1 = new UserDto(1L, getRandomString(), getRandomEmail());
+        userDto2 = new UserDto(2L, getRandomString(), getRandomEmail());
+        itemRequestDto = new ItemRequestDto(1L, getRandomString(),
+                new UserDto(1L, getRandomString(), getRandomEmail()),
+                LocalDateTime.of(2022, 1, 2, 3, 4, 5), null);
+    }
 
     @Test
-    void shouldException_whenGetItemRequest_withWrongId() {
-        ItemRequestService itemRequestServiceWith = new ItemRequestService(itemRequestRepository,
-                null, new ServiceUtil(null, userService, null));
-
-        when(userService.findUserById(any(Long.class)))
-                .thenReturn(new User());
-        when(itemRequestRepository.findById(any(Long.class)))
-                .thenReturn(Optional.empty());
-        final NotFoundException exception = assertThrows(
-                NotFoundException.class,
-                () -> itemRequestServiceWith.getRequestById(-1L, 1L));
-        assertEquals("Запрос не найден", exception.getMessage());
+    void createRequest() {
+        UserDto newUserDto = userService.createUser(userDto1);
+        ItemRequestDto returnRequestDto = itemRequestService.createRequest(newUserDto.getId(), itemRequestDto,
+                LocalDateTime.of(2022, 1, 2, 3, 4, 5));
+        assertThat(returnRequestDto.getDescription(), equalTo(itemRequestDto.getDescription()));
     }
+
+    @Test
+    void getAllRequests() {
+        UserDto firstUserDto = userService.createUser(userDto1);
+        UserDto newUserDto = userService.createUser(userDto2);
+        itemRequestService.createRequest(newUserDto.getId(), itemRequestDto,
+                LocalDateTime.of(2023, 1, 2, 3, 4, 5));
+        itemRequestService.createRequest(newUserDto.getId(), itemRequestDto,
+                LocalDateTime.of(2024, 1, 2, 3, 4, 5));
+        List<ItemRequestDto> listItemRequest = itemRequestService.getAllRequests(0, 10, firstUserDto.getId());
+        assertThat(listItemRequest.size(), equalTo(2));
+    }
+
+    @Test
+    void getRequests() {
+        userService.createUser(userDto1);
+        UserDto newUserDto = userService.createUser(userDto2);
+        itemRequestService.createRequest(newUserDto.getId(), itemRequestDto,
+                LocalDateTime.of(2023, 1, 2, 3, 4, 5));
+        itemRequestService.createRequest(newUserDto.getId(), itemRequestDto,
+                LocalDateTime.of(2024, 1, 2, 3, 4, 5));
+        List<ItemRequestDto> listItemRequest = itemRequestService.getRequests(newUserDto.getId());
+        assertThat(listItemRequest.size(), equalTo(2));
+    }
+
+    @Test
+    void getRequestById() {
+        UserDto firstUserDto = userService.createUser(userDto1);
+        ItemRequestDto newItemRequestDto = itemRequestService.createRequest(firstUserDto.getId(), itemRequestDto,
+                LocalDateTime.of(2023, 1, 2, 3, 4, 5));
+        ItemRequestDto returnItemRequestDto = itemRequestService.getRequestById(newItemRequestDto.getId(),
+                firstUserDto.getId());
+        assertThat(returnItemRequestDto.getDescription(), equalTo(itemRequestDto.getDescription()));
+    }
+
 }
