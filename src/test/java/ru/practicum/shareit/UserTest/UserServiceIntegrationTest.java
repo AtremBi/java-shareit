@@ -56,7 +56,7 @@ public class UserServiceIntegrationTest {
         Long id = returnUserDto.getId();
         returnUserDto.setId(null);
         returnUserDto.setEmail("second@second.ru");
-        final AlreadyExistException exception = assertThrows(
+        AlreadyExistException exception = assertThrows(
                 AlreadyExistException.class,
                 () -> userService.updateUser(id, returnUserDto));
         assertEquals("Пользователь с таким email уже существует",
