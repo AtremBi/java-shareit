@@ -73,4 +73,5 @@ public class UserServiceUnitTest {
         assertThat(user.getName(), equalTo(userDto.getName()));
         assertThat(user.getEmail(), equalTo(userDto.getEmail()));
     }
+
 }

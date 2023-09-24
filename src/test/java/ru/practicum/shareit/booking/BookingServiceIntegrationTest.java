@@ -7,12 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.BookingInputDto;
-import ru.practicum.shareit.item.ItemService;
+import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.Dto.UserDto;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.user.UserMapper;
+import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,37 +28,42 @@ import static ru.practicum.shareit.TestUtil.getRandomString;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class BookingServiceIntegrationTest {
     private final BookingService bookingService;
-    private final UserService userService;
-    private final ItemService itemService;
+    private final ItemRepository itemRepository;
+    private final ItemMapper itemMapper;
+    private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
     private User user;
-    private UserDto userDto1;
-    private UserDto userDto2;
-    private ItemDto itemDto1;
+    private User user1;
+    private Item item1;
 
     @BeforeEach
     public void setUp() {
-        user = new User(300L, getRandomString(), getRandomEmail());
-        userDto1 = new UserDto(301L, getRandomString(), getRandomEmail());
-        userDto2 = new UserDto(302L, getRandomString(), getRandomEmail());
-        itemDto1 = new ItemDto(301L, getRandomString(), getRandomString(), true,
-                user.getId(), null, null, null);
+        user = new User(null, getRandomString(), getRandomEmail());
+        user1 = new User(null, getRandomString(), getRandomEmail());
+        item1 = new Item(null, getRandomString(), getRandomString(), true,
+                null, null);
     }
 
     @Test
     void getBookings() {
-        UserDto ownerDto = userService.createUser(userDto1);
-        UserDto newUserDto = userService.createUser(userDto2);
-        ItemDto newItemDto = itemService.createItem(ownerDto.getId(), itemDto1);
-        BookingInputDto bookingInputDto = new BookingInputDto(
-                newItemDto.getId(),
+        UserDto ownerDto = UserMapper.toUserDto(userRepository.save(user));
+        UserDto newUserDto = UserMapper.toUserDto(userRepository.save(user1));
+        item1.setOwnerId(ownerDto.getId());
+        ItemDto newItemDto = itemMapper.toItemDto(itemRepository.save(item1));
+        bookingRepository.save((new Booking(
+                1L,
                 LocalDateTime.of(2030, 12, 25, 12, 0, 0),
-                LocalDateTime.of(2030, 12, 26, 12, 0, 0));
-        bookingService.create(bookingInputDto, newUserDto.getId());
-        BookingInputDto bookingInputDto1 = new BookingInputDto(
-                newItemDto.getId(),
+                LocalDateTime.of(2030, 12, 26, 12, 0, 0),
+                itemMapper.toItem(user.getId(), newItemDto),
+                UserMapper.toUser(newUserDto),
+                BookingStatus.WAITING)));
+        bookingRepository.save((new Booking(
+                2L,
                 LocalDateTime.of(2031, 12, 25, 12, 0, 0),
-                LocalDateTime.of(2031, 12, 26, 12, 0, 0));
-        bookingService.create(bookingInputDto1, newUserDto.getId());
+                LocalDateTime.of(2031, 12, 26, 12, 0, 0),
+                itemMapper.toItem(user.getId(), newItemDto),
+                UserMapper.toUser(newUserDto),
+                BookingStatus.WAITING)));
         List<BookingDto> listBookings = bookingService.getBookings(newUserDto.getId(), "FUTURE",
                 0, 20);
         assertEquals(2, listBookings.size());

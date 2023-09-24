@@ -15,10 +15,13 @@ import ru.practicum.shareit.exeptions.NotFoundException;
 import ru.practicum.shareit.exeptions.ValidationException;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.Dto.UserDto;
 import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.UserMapper;
+import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.UserService;
 
 import java.time.LocalDateTime;
@@ -37,8 +40,8 @@ import static ru.practicum.shareit.TestUtil.getRandomString;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class BookingServiceUnitTest {
     private BookingService bookingService;
-    private UserService userService;
-    private ItemService itemService;
+    private UserRepository userRepository;
+    private ItemRepository itemRepository;
     private BookingRepository bookingRepository;
     private final ItemMapper itemMapper;
     private User user;
@@ -54,10 +57,12 @@ public class BookingServiceUnitTest {
 
     @BeforeEach
     public void setUp() {
-        userService = mock(UserService.class);
-        itemService = mock(ItemService.class);
+        userRepository = mock(UserRepository.class);
+        itemRepository = mock(ItemRepository.class);
         bookingRepository = mock(BookingRepository.class);
-        bookingService = new BookingService(bookingRepository, userService, itemService);
+
+        bookingService = new BookingService(bookingRepository, new UserService(userRepository),
+                new ItemService(itemRepository, null, null, null));
         user = new User(300L, getRandomString(), getRandomEmail());
         userDto1 = new UserDto(301L, getRandomString(), getRandomEmail());
         userDto2 = new UserDto(302L, getRandomString(), getRandomEmail());
@@ -123,8 +128,8 @@ public class BookingServiceUnitTest {
 
     @Test
     void create() {
-        when(itemService.findItemById(any(Long.class)))
-                .thenReturn(itemMapper.toItem(user.getId(), itemDto1));
+        when(itemRepository.findById(any(Long.class)))
+                .thenReturn(Optional.of(itemMapper.toItem(user.getId(), itemDto1)));
 
         Item item = itemMapper.toItem(user.getId(), itemDto1);
         item.setAvailable(false);
@@ -143,20 +148,35 @@ public class BookingServiceUnitTest {
         assertEquals("Вещь не доступна для бронирования",
                 exp2.getMessage());
 
-        when(itemService.findItemById(any(Long.class)))
-                .thenReturn(item);
+        when(itemRepository.findById(any(Long.class)))
+                .thenReturn(Optional.of(item));
 
         ItemUnavailable exp3 = assertThrows(ItemUnavailable.class,
                 () -> bookingService.create(bookingInputDto, 44L));
         assertEquals("Вещь не доступна для бронирования",
                 exp3.getMessage());
+
+        when(bookingRepository.save(any()))
+                .thenReturn(new Booking());
+        user.setId(44L);
+        when(userRepository.save(any()))
+                .thenReturn(user);
+        when(userRepository.findById(any(Long.class)))
+                .thenReturn(Optional.of(user));
+        item.setAvailable(true);
+        bookingInputDto.setStart(LocalDateTime.of(2030, 12, 25, 12, 0, 0));
+        bookingInputDto.setEnd(LocalDateTime.of(2031, 12, 25, 12, 0, 0));
+        userRepository.save(UserMapper.toUser(userDto1));
+
+        assertEquals(new BookingDto(null, null, null, null, null, null),
+                bookingService.create(bookingInputDto, user.getId()));
     }
 
     @Test
     void getBookings() {
 
-        when(userService.findUserById(any(Long.class)))
-                .thenReturn(user);
+        when(userRepository.findById(any(Long.class)))
+                .thenReturn(Optional.of(user));
         when(bookingRepository.findAllByBookerId(any(Long.class), any()))
                 .thenReturn(new PageImpl<>(List.of(booking)));
         when(bookingRepository.findByBookerIdAndStartIsAfter(any(Long.class), any(LocalDateTime.class), any()))
@@ -197,8 +217,8 @@ public class BookingServiceUnitTest {
     @Test
     void getBookingsByOwner() {
 
-        when(userService.findUserById(any(Long.class)))
-                .thenReturn(user);
+        when(userRepository.findById(any(Long.class)))
+                .thenReturn(Optional.of(user));
         when(bookingRepository.findAllByItemOwnerId(any(Long.class), any()))
                 .thenReturn(new PageImpl<>(List.of(booking)));
         when(bookingRepository.findByItemOwnerIdAndStartIsAfter(any(Long.class), any(LocalDateTime.class), any()))
@@ -281,8 +301,8 @@ public class BookingServiceUnitTest {
 
     @Test
     void getBookingById() {
-        when(userService.findUserById(any(Long.class)))
-                .thenReturn(user);
+        when(userRepository.findById(any(Long.class)))
+                .thenReturn(Optional.of(user));
         when(bookingRepository.findById(any(Long.class)))
                 .thenReturn(Optional.of(waitingBooking));
 

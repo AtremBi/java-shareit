@@ -11,14 +11,12 @@ import ru.practicum.shareit.exeptions.NotFoundException;
 import ru.practicum.shareit.user.Dto.UserDto;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserMapper;
+import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.UserService;
-
-import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static ru.practicum.shareit.TestUtil.getRandomEmail;
 import static ru.practicum.shareit.TestUtil.getRandomString;
 
@@ -29,6 +27,7 @@ public class UserServiceIntegrationTest {
     private UserMapper mapper = new UserMapper();
     private UserDto userDto;
     private final UserService userService;
+    private final UserRepository userRepository;
     private User user;
 
     @BeforeEach
@@ -38,32 +37,22 @@ public class UserServiceIntegrationTest {
     }
 
     @Test
-    void createUser() {
-        UserDto returnUserDto = userService.createUser(userDto);
-        assertThat(returnUserDto.getName(), equalTo(userDto.getName()));
-        assertThat(returnUserDto.getEmail(), equalTo(userDto.getEmail()));
-    }
-
-    @Test
     void deleteUser() {
         NotFoundException exp = assertThrows(NotFoundException.class, () -> userService.deleteUser(10L));
         assertEquals("Пользователь не найден", exp.getMessage());
 
         User user = new User(10L, "Ten", "ten@ten.ru");
-        UserDto returnUserDto = userService.createUser(UserMapper.toUserDto(user));
-        List<UserDto> listUser = userService.getUsers();
-        int size = listUser.size();
+        UserDto returnUserDto = UserMapper.toUserDto(userRepository.save(user));
         userService.deleteUser(returnUserDto.getId());
-        listUser = userService.getUsers();
-        assertThat(listUser.size(), equalTo(size - 1));
+        assertTrue(userService.getUsers().isEmpty());
     }
 
     @Test
     void updateUser() {
         user = new User(2L, "User2", "second@second.ru");
-        userService.createUser(UserMapper.toUserDto(user));
+        userRepository.save(user);
         User newUser = new User(3L, "User3", "third@third.ru");
-        UserDto returnUserDto = userService.createUser(UserMapper.toUserDto(newUser));
+        UserDto returnUserDto = UserMapper.toUserDto(userRepository.save(newUser));
         Long id = returnUserDto.getId();
         returnUserDto.setId(null);
         returnUserDto.setEmail("second@second.ru");

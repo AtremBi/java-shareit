@@ -1,7 +1,6 @@
 package ru.practicum.shareit.Item;
 
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,10 +8,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageImpl;
 import ru.practicum.shareit.ServiceUtil;
 import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.BookingService;
 import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.exeptions.ItemUnavailable;
 import ru.practicum.shareit.exeptions.NotFoundException;
 import ru.practicum.shareit.item.Comment;
 import ru.practicum.shareit.item.ItemMapper;
@@ -23,11 +25,18 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.user.Dto.UserDto;
 import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.UserMapper;
+import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.UserService;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -51,8 +60,8 @@ public class ItemServiceUnitTest {
     private UserDto userDto2;
     private ItemDto itemDto;
     private ItemDto itemDto2;
-    private UserService userService;
-    private BookingService bookingService;
+    private UserRepository userRepository;
+    private BookingRepository bookingRepository;
 
     @BeforeEach
     public void setUp() {
@@ -65,9 +74,10 @@ public class ItemServiceUnitTest {
         itemDto2 = new ItemDto(202L, "Item2", "Description2", true,
                 user.getId(), null, null, null);
 
-        userService = mock(UserService.class);
-        bookingService = mock(BookingService.class);
-        ServiceUtil serviceUtil = new ServiceUtil(null, userService, bookingService);
+        userRepository = mock(UserRepository.class);
+        bookingRepository = mock(BookingRepository.class);
+        ServiceUtil serviceUtil = new ServiceUtil(null, new UserService(userRepository),
+                new BookingService(bookingRepository, null, null));
         itemService = new ItemService(itemRepository, commentRepository, serviceUtil,
                 itemMapper);
     }
@@ -76,17 +86,18 @@ public class ItemServiceUnitTest {
     void getItemById() {
         when(itemRepository.findById(any(Long.class)))
                 .thenReturn(Optional.empty());
-        final NotFoundException exception = Assertions.assertThrows(
+        final NotFoundException exception = assertThrows(
                 NotFoundException.class,
                 () -> itemService.getItemById(-1L, 1L));
-        Assertions.assertEquals("Вещь не найдена", exception.getMessage());
+        assertEquals("Вещь не найдена", exception.getMessage());
     }
 
     @Test
     void addItemComment() {
-        when(userService.findUserById(any()))
-                .thenReturn(user);
-        when(bookingService.getBookingWithUserBookedItem(any(Long.class), any(Long.class)))
+        when(userRepository.findById(any()))
+                .thenReturn(Optional.of(user));
+        when(bookingRepository.findFirstByItemIdAndBookerIdAndEndIsBeforeAndStatus(
+                any(Long.class), any(Long.class), any(LocalDateTime.class), any(BookingStatus.class)))
                 .thenReturn(new Booking(1L,
                         LocalDateTime.of(2012, 12, 25, 12, 0, 0),
                         LocalDateTime.of(2013, 12, 26, 12, 0, 0),
@@ -103,8 +114,58 @@ public class ItemServiceUnitTest {
         comment.setText(commentDto.getText());
         when(commentRepository.save(any()))
                 .thenReturn(comment);
-        Assertions.assertEquals(commentDto.getText(),
+        assertEquals(commentDto.getText(),
                 itemService.addComment(commentDto, itemDto.getId(), user.getId()).getText());
+
+        when(bookingRepository.findFirstByItemIdAndBookerIdAndEndIsBeforeAndStatus(
+                any(Long.class), any(Long.class), any(LocalDateTime.class), any(BookingStatus.class)))
+                .thenReturn(null);
+
+        ItemUnavailable exp = assertThrows(ItemUnavailable.class,
+                () -> itemService.addComment(commentDto, itemDto.getId(), user.getId()).getText());
+        assertEquals("У пользователя нет забронированных вещей", exp.getMessage());
+    }
+
+    @Test
+    void createItem() {
+        when(userRepository.findById(any()))
+                .thenReturn(Optional.of(UserMapper.toUser(userDto1)));
+        when(itemRepository.save(any()))
+                .thenReturn(itemMapper.toItem(userDto1.getId(), itemDto));
+        when(itemRepository.findById(any(Long.class)))
+                .thenReturn(Optional.of(itemMapper.toItem(userDto1.getId(), itemDto)));
+        itemService.createItem(userDto1.getId(), itemDto);
+        ItemDto returnItemDto = itemService.getItemById(itemDto.getId(), userDto1.getId());
+        assertThat(returnItemDto.getDescription(), equalTo(itemDto.getDescription()));
+    }
+
+    @Test
+    void delete() {
+        NotFoundException exp2 = assertThrows(NotFoundException.class,
+                () -> itemService.deleteItem(-2L));
+        assertEquals("Вещь не найдена", exp2.getMessage());
+    }
+
+    @Test
+    void getItems() {
+        when(itemRepository.findItemByOwnerId(any(Long.class), any()))
+                .thenReturn(new PageImpl<>(List.of(itemMapper.toItem(userDto1.getId(), itemDto))));
+
+        List<ItemDto> listItems = itemService.getItems(userDto1.getId(), 0, 10);
+        assertEquals(1, listItems.size());
+
+        NotFoundException exp2 = assertThrows(NotFoundException.class,
+                () -> itemService.deleteItem(-2L));
+        assertEquals("Вещь не найдена", exp2.getMessage());
+    }
+
+    @Test
+    void searchItems() {
+        when(itemRepository.searchByQuery(any(String.class), any()))
+                .thenReturn(new PageImpl<>(List.of(itemMapper.toItem(user.getId(), itemDto))));
+
+        List<ItemDto> listItems = itemService.searchItems("item", 0, 1);
+        assertEquals(1, listItems.size());
     }
 
 }
