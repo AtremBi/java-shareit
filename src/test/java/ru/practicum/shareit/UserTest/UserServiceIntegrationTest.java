@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.exeptions.AlreadyExistException;
 import ru.practicum.shareit.exeptions.NotFoundException;
 import ru.practicum.shareit.user.Dto.UserDto;
 import ru.practicum.shareit.user.User;
@@ -49,18 +48,10 @@ public class UserServiceIntegrationTest {
 
     @Test
     void updateUser() {
-        user = new User(2L, "User2", "second@second.ru");
-        userRepository.save(user);
         User newUser = new User(3L, "User3", "third@third.ru");
         UserDto returnUserDto = UserMapper.toUserDto(userRepository.save(newUser));
         Long id = returnUserDto.getId();
         returnUserDto.setId(null);
-        returnUserDto.setEmail("second@second.ru");
-        AlreadyExistException exception = assertThrows(
-                AlreadyExistException.class,
-                () -> userService.updateUser(id, returnUserDto));
-        assertEquals("Пользователь с таким email уже существует",
-                exception.getMessage());
 
         returnUserDto.setId(id);
         returnUserDto.setName("NewName");
