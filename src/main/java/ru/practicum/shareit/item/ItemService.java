@@ -2,8 +2,11 @@ package ru.practicum.shareit.item;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.Pagination.Pagination;
 import ru.practicum.shareit.ServiceUtil;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingStatus;
@@ -12,15 +15,18 @@ import ru.practicum.shareit.exeptions.NotFoundException;
 import ru.practicum.shareit.exeptions.WrongUserException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.repository.CommentRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
 @Service
+@Transactional
 public class ItemService {
     private final ItemRepository itemStorage;
     private final CommentRepository commentRepository;
@@ -43,13 +49,16 @@ public class ItemService {
         return itemMapper.toItemDto(itemStorage.save(item));
     }
 
-    public List<ItemDto> searchItems(String text) {
+    public List<ItemDto> searchItems(String text, Integer from, Integer size) {
+        PageRequest pageRequest = Pagination.of(from, size, Sort.Direction.ASC, "name");
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        return itemMapper.toItemDto(itemStorage.searchByQuery(text));
+        return itemStorage.searchByQuery(text, pageRequest).stream()
+                .map(itemMapper::toItemDto).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public ItemDto getItemById(Long itemId, Long userId) {
         Item item = findItemById(itemId);
         ItemDto itemDto;
@@ -69,13 +78,21 @@ public class ItemService {
         return itemDto;
     }
 
+    @Transactional(readOnly = true)
     public Item findItemById(Long itemId) {
         return itemStorage.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Вещь не найдена"));
     }
 
-    public List<ItemDto> getItems(Long userId) {
-        return itemMapper.toItemDtoWithLastAndEndNextBooking(itemStorage.findItemByOwnerId(userId).stream()
+    @Transactional(readOnly = true)
+    public List<ItemDto> getItemsByRequestId(Long requestId) {
+        return itemMapper.toItemDto(itemStorage.findByRequestId(requestId));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ItemDto> getItems(Long userId, Integer from, Integer size) {
+        PageRequest pageRequest = Pagination.of(from, size, Sort.Direction.DESC, "name");
+        return itemMapper.toItemDtoWithLastAndEndNextBooking(itemStorage.findItemByOwnerId(userId, pageRequest).stream()
                 .sorted(Comparator.comparing(Item::getId))
                 .collect(toList()));
     }
@@ -116,7 +133,7 @@ public class ItemService {
         return itemMapper.toCommentDto(commentRepository.save(comment));
     }
 
-
+    @Transactional(readOnly = true)
     public List<CommentDto> getCommentsByItemId(Long itemId) {
         return commentRepository.findAllByItemId(itemId,
                         Sort.by(Sort.Direction.DESC, "created")).stream()
@@ -128,7 +145,7 @@ public class ItemService {
         if (userId.equals(itemStorage.findById(itemId).get().getOwnerId())) {
             return true;
         } else {
-            throw new WrongUserException("Владельца нельзя сменить");
+            throw new WrongUserException("У пользователя нет такой вещи");
         }
     }
 }

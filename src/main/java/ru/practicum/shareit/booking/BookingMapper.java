@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking;
 
+import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingInputDto;
 import ru.practicum.shareit.booking.dto.ShortBookingDto;
@@ -10,8 +11,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
+@UtilityClass
 public class BookingMapper {
-    public static ShortBookingDto toShortBookingDto(Booking booking) {
+    public ShortBookingDto toShortBookingDto(Booking booking) {
         if (booking != null) {
             return new ShortBookingDto(
                     booking.getId(),
@@ -23,7 +25,7 @@ public class BookingMapper {
         return null;
     }
 
-    public static BookingDto toBookingDto(Booking booking) {
+    public BookingDto toBookingDto(Booking booking) {
         return new BookingDto(
                 booking.getId(),
                 booking.getStart(),
@@ -34,11 +36,11 @@ public class BookingMapper {
         );
     }
 
-    public static List<BookingDto> toBookingDto(List<Booking> bookings) {
+    public List<BookingDto> toBookingDto(List<Booking> bookings) {
         return bookings.stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
     }
 
-    public static Booking toBooking(BookingDto bookingDto) {
+    public Booking toBooking(BookingDto bookingDto) {
         return new Booking(
                 bookingDto.getId(),
                 bookingDto.getStart(),
@@ -49,20 +51,8 @@ public class BookingMapper {
         );
     }
 
-    public static Booking toBooking(Long bookerId, ShortBookingDto booking,
-                                    ItemService itemService, UserService userService) {
-        return new Booking(
-                null,
-                booking.getStart(),
-                booking.getEnd(),
-                itemService.findItemById(booking.getId()),
-                userService.findUserById(bookerId),
-                BookingStatus.WAITING
-        );
-    }
-
-    public static Booking toBooking(Long bookerId, BookingInputDto booking,
-                                    ItemService itemService, UserService userService) {
+    public Booking toBooking(Long bookerId, BookingInputDto booking,
+                             ItemService itemService, UserService userService) {
         return new Booking(
                 null,
                 booking.getStart(),
