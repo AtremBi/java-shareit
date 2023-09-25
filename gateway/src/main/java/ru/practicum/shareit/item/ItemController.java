@@ -46,14 +46,14 @@ public class ItemController {
 
     @ResponseBody
     @PatchMapping("/{itemId}")
-    public ResponseEntity<Object> update (@RequestBody ItemDto itemDto, @PathVariable Long itemId,
+    public ResponseEntity<Object> update(@RequestBody ItemDto itemDto, @PathVariable Long itemId,
                                          @RequestHeader(USER_ID) Long userId) {
         log.info("update: itemId={}", itemId);
         return itemClient.update(itemDto, itemId, userId);
     }
 
     @DeleteMapping("/{itemId}")
-    public ResponseEntity<Object> delete (@PathVariable Long itemId, @RequestHeader(USER_ID)Long ownerId) {
+    public ResponseEntity<Object> delete(@PathVariable Long itemId, @RequestHeader(USER_ID) Long ownerId) {
         log.info("delete: itemId={}", itemId);
         return itemClient.delete(itemId, ownerId);
     }
@@ -68,7 +68,7 @@ public class ItemController {
 
     @ResponseBody
     @PostMapping("/{itemId}/comment")
-    public ResponseEntity<Object> createComment (@RequestBody @Valid CommentDto commentDto,
+    public ResponseEntity<Object> createComment(@RequestBody @Valid CommentDto commentDto,
                                                 @RequestHeader(USER_ID) Long userId,
                                                 @PathVariable Long itemId) {
         log.info("createComment: userId={}", userId);

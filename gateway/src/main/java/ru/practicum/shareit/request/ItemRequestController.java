@@ -35,7 +35,6 @@ public class ItemRequestController {
         return itemRequestClient.getItemRequestById(userId, itemRequestId);
     }
 
-
     @GetMapping
     public ResponseEntity<Object> getOwnItemRequests(@RequestHeader(USER_ID) Long userId) {
         log.info("getOwnItemRequests: userId={}", userId);
