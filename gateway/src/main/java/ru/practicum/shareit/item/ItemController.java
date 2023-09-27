@@ -10,6 +10,7 @@ import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
 @Controller
@@ -25,7 +26,7 @@ public class ItemController {
     @GetMapping
     public ResponseEntity<Object> getItemsByOwner(@RequestHeader(USER_ID) Long ownerId,
                                                   @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
-                                                  @RequestParam(required = false, defaultValue = "20") Integer size) {
+                                                  @Positive @RequestParam(defaultValue = "20") Integer size) {
         log.info("getItemsByOwner: ownerId={}", ownerId);
         return itemClient.getItemsByOwner(ownerId, from, size);
     }
@@ -44,7 +45,6 @@ public class ItemController {
         return itemClient.getItemById(userId, itemId);
     }
 
-    @ResponseBody
     @PatchMapping("/{itemId}")
     public ResponseEntity<Object> update(@RequestBody ItemDto itemDto, @PathVariable Long itemId,
                                          @RequestHeader(USER_ID) Long userId) {
@@ -61,7 +61,7 @@ public class ItemController {
     @GetMapping("/search")
     public ResponseEntity<Object> getItemsBySearchQuery(@RequestParam String text,
                                                         @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
-                                                        @RequestParam(required = false, defaultValue = "20") Integer size) {
+                                                        @Positive @RequestParam(defaultValue = "20") Integer size) {
         log.info("getItemsBySearchQuery: text={}", text);
         return itemClient.getItemsBySearchQuery(text, from, size);
     }

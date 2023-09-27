@@ -10,6 +10,7 @@ import ru.practicum.shareit.booking.dto.BookItemRequestDto;
 import ru.practicum.shareit.booking.dto.BookingState;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
 @Controller
@@ -26,7 +27,7 @@ public class BookingController {
                                               @RequestParam(name = "state", defaultValue = "all") String stateParam,
                                               @PositiveOrZero @RequestParam(name = "from", defaultValue = "0")
                                               Integer from,
-                                              @RequestParam(required = false, defaultValue = "20") Integer size) {
+                                              @Positive @RequestParam(defaultValue = "20") Integer size) {
         BookingState state = BookingState.from(stateParam)
                 .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
         log.info("Get booking with state {}, userId={}, from={}, size={}", stateParam, userId, from, size);
@@ -52,14 +53,13 @@ public class BookingController {
                                                    String stateParam,
                                                    @RequestHeader(USER_ID) Long userId,
                                                    @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
-                                                   @RequestParam(required = false, defaultValue = "20") Integer size) {
+                                                   @Positive @RequestParam(defaultValue = "20") Integer size) {
         BookingState state = BookingState.from(stateParam)
                 .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
         log.info("getBookingsOwner: userId={}, state={}", userId, state);
         return bookingClient.getBookingsOwner(userId, state, from, size);
     }
 
-    @ResponseBody
     @PatchMapping("/{bookingId}")
     public ResponseEntity<Object> update(@PathVariable Long bookingId,
                                          @RequestHeader(USER_ID) Long userId, @RequestParam Boolean approved) {

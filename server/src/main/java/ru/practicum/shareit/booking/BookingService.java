@@ -1,7 +1,6 @@
 package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -27,11 +26,8 @@ import java.util.stream.Collectors;
 @Transactional
 @RequiredArgsConstructor
 public class BookingService {
-    @Autowired
     private final BookingRepository bookingRepository;
-    @Autowired
     private final UserService userService;
-    @Autowired
     private final ItemService itemService;
 
     public BookingDto create(BookingInputDto bookingInputDto, Long bookerId) {

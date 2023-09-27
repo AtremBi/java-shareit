@@ -15,6 +15,7 @@ import ru.practicum.shareit.client.BaseClient;
 public class BookingClient extends BaseClient {
     private static final String API_PREFIX = "/bookings";
 
+
     @Autowired
     public BookingClient(@Value("${shareit-server.url}") String serverUrl, RestTemplateBuilder builder) {
         super(
@@ -40,7 +41,6 @@ public class BookingClient extends BaseClient {
         }
         return get(path, userId, null);
     }
-
 
     public ResponseEntity<Object> create(Long userId, BookItemRequestDto requestDto) {
         return post("", userId, requestDto);

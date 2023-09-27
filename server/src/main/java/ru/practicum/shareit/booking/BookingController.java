@@ -6,8 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingInputDto;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Slf4j
@@ -19,7 +17,7 @@ public class BookingController {
     private static final String USER_ID = "X-Sharer-User-Id";
 
     @PostMapping
-    public BookingDto create(@NotNull @Valid @RequestBody BookingInputDto bookingDto,
+    public BookingDto create(@RequestBody BookingInputDto bookingDto,
                              @RequestHeader(value = USER_ID) Long userId) {
         logInfo("create: ", "bookingDto - " + bookingDto + " userId - " + userId);
         return bookingService.create(bookingDto, userId);

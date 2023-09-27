@@ -1,7 +1,6 @@
 package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,11 +16,8 @@ import java.util.stream.Collectors;
 @Transactional
 @RequiredArgsConstructor
 public class ItemRequestService {
-    @Autowired
     private final ItemRequestRepository itemRequestRepository;
-    @Autowired
     private final ItemRequestMapper mapper;
-    @Autowired
     private final ServiceUtil serviceUtil;
 
     public ItemRequestDto createRequest(Long requestorId, ItemRequestDto itemRequestDto, LocalDateTime created) {

@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 
-import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,7 +18,7 @@ public class ItemRequestController {
 
     @PostMapping
     public ItemRequestDto addRequest(@RequestHeader(value = USER_ID) Long requestorId,
-                                     @Valid @RequestBody ItemRequestDto itemRequestDto) {
+                                     @RequestBody ItemRequestDto itemRequestDto) {
         logInfo("addRequest: ", "requestorId - " + requestorId + " itemRequestDto - "
                 + itemRequestDto);
         return service.createRequest(requestorId, itemRequestDto, LocalDateTime.now());

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
 @Controller
@@ -45,7 +46,7 @@ public class ItemRequestController {
     public ResponseEntity<Object> getAllItemRequests(@RequestHeader(USER_ID) Long userId,
                                                      @PositiveOrZero @RequestParam(name = "from", defaultValue = "0")
                                                      Integer from,
-                                                     @RequestParam(required = false, defaultValue = "20") Integer size) {
+                                                     @Positive @RequestParam(defaultValue = "20") Integer size) {
         log.info("getAllItemRequests: userId={}", userId);
         return itemRequestClient.getAllItemRequests(userId, from, size);
     }
