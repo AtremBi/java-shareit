@@ -48,7 +48,7 @@ public class ItemControllerTest {
     private Item item = new Item(1L, getRandomString(), getRandomString(), true, user.getId(), null);
     private ItemDto itemDto = new ItemDto(1L, getRandomString(), getRandomString(), true,
             null, null, null, null);
-    private CommentDto commentDto = new CommentDto(1L, getRandomString(), itemDto,
+    private CommentDto commentDto = new CommentDto(1L, getRandomString(), item,
             user.getName(), LocalDateTime.of(2022, 3, 5, 1, 2, 3));
 
     private List listItemDto = new ArrayList<>();

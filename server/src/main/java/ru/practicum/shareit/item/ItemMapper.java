@@ -73,7 +73,7 @@ public class ItemMapper {
         return new CommentDto(
                 comment.getId(),
                 comment.getText(),
-                toItemDto(comment.getItem()),
+                comment.getItem(),
                 comment.getAuthor().getName(),
                 comment.getCreated()
         );
