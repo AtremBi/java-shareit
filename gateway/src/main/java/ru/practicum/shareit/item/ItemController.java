@@ -66,7 +66,6 @@ public class ItemController {
         return itemClient.getItemsBySearchQuery(text, from, size);
     }
 
-    @ResponseBody
     @PostMapping("/{itemId}/comment")
     public ResponseEntity<Object> createComment(@RequestBody @Valid CommentDto commentDto,
                                                 @RequestHeader(USER_ID) Long userId,

@@ -104,7 +104,7 @@ public class ItemServiceUnitTest {
                         itemMapper.toItem(userDto1.getId(), itemDto),
                         user,
                         BookingStatus.CANCELED));
-        CommentDto commentDto = new CommentDto(1L, "Comment1", itemMapper.toItem(user.getId(), itemDto),
+        CommentDto commentDto = new CommentDto(1L, "Comment1", itemDto,
                 user.getName(), LocalDateTime.now());
         Comment comment = new Comment();
         comment.setId(1L);

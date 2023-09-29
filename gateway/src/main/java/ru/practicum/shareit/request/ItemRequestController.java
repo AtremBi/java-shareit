@@ -21,7 +21,6 @@ public class ItemRequestController {
     private static final String USER_ID = "X-Sharer-User-Id";
     private final ItemRequestClient itemRequestClient;
 
-    @ResponseBody
     @PostMapping
     public ResponseEntity<Object> create(@RequestBody @Valid ItemRequestDto itemRequestDto,
                                          @RequestHeader(USER_ID) Long requestorId) {
